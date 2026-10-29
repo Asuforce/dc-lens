@@ -1,4 +1,5 @@
 import type { SimulationResult } from "../engine/types.ts";
+import { resultToCsv } from "../lib/csv.ts";
 import type { Dataset } from "../regulations/schema.ts";
 import { chart } from "./charts.ts";
 
@@ -43,6 +44,20 @@ export function renderResults(
     cards.append(card);
   }
   root.append(cards);
+  const download = document.createElement("button");
+  download.type = "button";
+  download.textContent = "CSVをダウンロード";
+  download.addEventListener("click", () => {
+    const url = URL.createObjectURL(
+      new Blob([resultToCsv(result)], { type: "text/csv;charset=utf-8" }),
+    );
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "dc-lens-result.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  });
+  root.append(download);
   const first = result.yearlyResults[0];
   if (first) {
     const d = document.createElement("details");
