@@ -78,6 +78,7 @@ export function renderResults(
     "出典 versions",
   ]) {
     const th = document.createElement("th");
+    th.scope = "col";
     th.textContent = h;
     header.append(th);
   }
