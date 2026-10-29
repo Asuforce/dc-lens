@@ -1,0 +1,140 @@
+{
+  "meta": {
+    "kind": "income-tax",
+    "sourceName": "国税庁 タックスアンサー No.1410 給与所得控除・No.1199 基礎控除・No.2260 所得税の税率（令和8年4月1日現在法令等）、令和8年度税制改正（所得税の基礎控除の引上げ等関係）Q&A（令和8年5月）、防衛特別所得税及び復興特別所得税に関するQ&A（令和8年5月）",
+    "verifiedAt": "2026-10-29",
+    "version": "2026",
+    "effectiveFrom": "2026-01-01",
+    "effectiveTo": "2026-12-31",
+    "sourceUrl": "https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1410.htm",
+    "status": "verified",
+    "note": "令和8年分。令和8年度税制改正（基礎控除の引上げ、給与所得控除の最低保障額65万円から74万円への引上げ）は令和8年12月1日施行で令和8年分以後に適用され、令和8年12月の年末調整で精算される（令和8年11月までの源泉徴収は改正前の税額表）。基礎控除・給与所得控除の金額は令和8年分・令和9年分に適用され、令和10年分以後は基礎控除が別の金額に変わる（No.1199）。出典: 給与所得控除 https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1410.htm 、基礎控除 https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1199.htm 、税率 https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2260.htm 、施行時期と令和8・9年分の扱い https://www.nta.go.jp/users/gensen/2026kiso/pdf/0026005-024.pdf 。端数処理: 課税される所得金額は1,000円未満切捨て（No.2260）。復興特別所得税額（基準所得税額×2.1%）は1円未満切捨て、納付すべき所得税と復興特別所得税の確定金額は合計額の100円未満を切り捨てる（復興財確法24、https://www.nta.go.jp/publication/pamph/shotoku/fukko_tokubetsu/pdf/0014060.pdf 13）。未対応: 基準所得金額3億3,000万円超の特例（No.2260 ※1）、住宅借入金等特別控除、各種所得控除は本データの対象外。overYen は排他、upToYen は包含（源泉の「〜まで」「〜以下」に一致）。salaryDeductionBrackets は給与等の収入金額、basicDeductionBrackets は合計所得金額、taxBrackets は1,000円未満切捨て後の課税される所得金額に適用する（国税庁の区分は「1,950,000円から」なので上限は1,949,000円）。給与所得控除は定額・速算式で表すが、収入金額660万円未満は所得税法別表第五（年末調整等のための給与所得控除後の給与等の金額の表）で求める扱いで、収入金額69万1,000円以上220万円未満は給与所得の金額が別途定められている（69万1,000円以上74万1,000円未満は0、74万1,000円以上219万1,000円未満は収入金額-74万円、219万1,000円以上219万3,000円未満は145万1,000円、219万3,000円以上219万6,000円未満は145万3,000円、219万6,000円以上220万円未満は145万6,000円）。salaryDeductionMinimumYen は給与所得控除額の最低保障額（令和8・9年分は74万円、令和7年分は65万円）。基礎控除は居住者に対する額（所得税法第86条と租税特別措置法第41条の16の2の特例加算を合わせた額）。居住者でない場合は合計所得金額2,350万円以下で62万円。合計所得金額2,350万円超の帯に改正はない。"
+  },
+  "payload": {
+    "salaryDeductionBrackets": [
+      {
+        "overYen": 0,
+        "upToYen": 2200000,
+        "ratePercent": 0,
+        "constantYen": 740000
+      },
+      {
+        "overYen": 2200000,
+        "upToYen": 3600000,
+        "ratePercent": 30,
+        "constantYen": 80000
+      },
+      {
+        "overYen": 3600000,
+        "upToYen": 6600000,
+        "ratePercent": 20,
+        "constantYen": 440000
+      },
+      {
+        "overYen": 6600000,
+        "upToYen": 8500000,
+        "ratePercent": 10,
+        "constantYen": 1100000
+      },
+      {
+        "overYen": 8500000,
+        "upToYen": null,
+        "ratePercent": 0,
+        "constantYen": 1950000
+      }
+    ],
+    "salaryDeductionMinimumYen": 740000,
+    "basicDeductionBrackets": [
+      {
+        "overYen": 0,
+        "upToYen": 1320000,
+        "deductionYen": 1040000
+      },
+      {
+        "overYen": 1320000,
+        "upToYen": 3360000,
+        "deductionYen": 1040000
+      },
+      {
+        "overYen": 3360000,
+        "upToYen": 4890000,
+        "deductionYen": 1040000
+      },
+      {
+        "overYen": 4890000,
+        "upToYen": 6550000,
+        "deductionYen": 670000
+      },
+      {
+        "overYen": 6550000,
+        "upToYen": 23500000,
+        "deductionYen": 620000
+      },
+      {
+        "overYen": 23500000,
+        "upToYen": 24000000,
+        "deductionYen": 480000
+      },
+      {
+        "overYen": 24000000,
+        "upToYen": 24500000,
+        "deductionYen": 320000
+      },
+      {
+        "overYen": 24500000,
+        "upToYen": 25000000,
+        "deductionYen": 160000
+      },
+      {
+        "overYen": 25000000,
+        "upToYen": null,
+        "deductionYen": 0
+      }
+    ],
+    "taxBrackets": [
+      {
+        "overYen": 0,
+        "upToYen": 1949000,
+        "ratePercent": 5,
+        "deductionYen": 0
+      },
+      {
+        "overYen": 1949000,
+        "upToYen": 3299000,
+        "ratePercent": 10,
+        "deductionYen": 97500
+      },
+      {
+        "overYen": 3299000,
+        "upToYen": 6949000,
+        "ratePercent": 20,
+        "deductionYen": 427500
+      },
+      {
+        "overYen": 6949000,
+        "upToYen": 8999000,
+        "ratePercent": 23,
+        "deductionYen": 636000
+      },
+      {
+        "overYen": 8999000,
+        "upToYen": 17999000,
+        "ratePercent": 33,
+        "deductionYen": 1536000
+      },
+      {
+        "overYen": 17999000,
+        "upToYen": 39999000,
+        "ratePercent": 40,
+        "deductionYen": 2796000
+      },
+      {
+        "overYen": 39999000,
+        "upToYen": null,
+        "ratePercent": 45,
+        "deductionYen": 4796000
+      }
+    ],
+    "surtaxTotalPercent": 2.1
+  }
+}

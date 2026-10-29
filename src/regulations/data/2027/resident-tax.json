@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "kind": "resident-tax",
+    "version": "R9-2027",
+    "effectiveFrom": "2027-04-01",
+    "effectiveTo": "2028-03-31",
+    "sourceName": "総務省 令和8年度地方税制改正・地方税務行政の運営に当たっての留意事項等について（令和8年1月21日事務連絡）、総務省 地方税法等の一部を改正する法律の概要、租税特別措置法第29条の4（e-Gov法令検索）、地方税法第34条・第314条の2（e-Gov法令検索、令和9年・令和10年施行の改正後版を含む）",
+    "sourceUrl": "https://www.soumu.go.jp/main_content/001053325.pdf",
+    "verifiedAt": "2026-10-29",
+    "status": "provisional",
+    "note": "令和9年度（2027-04-01から2028-03-31）の個人住民税。令和8年度地方税制改正（令和8年3月31日公布）で定まった将来適用分だが、検証が済んでいないためprovisionalとする。前年所得課税: 令和9年度分は令和8年1月1日から12月31日の所得で算定する（賦課期日は令和9年1月1日、地方税法第39条）。給与所得控除の最低保障額74万円は、総務省事務連絡 https://www.soumu.go.jp/main_content/001053325.pdf の「(ア) 給与所得控除について、６５万円の最低保障額を６９万円に引き上げること。」「(イ) 令和９年度分及び令和１０年度分の個人住民税に係る給与所得控除の最低保障額について、(ア)に加え、５万円引き上げること。」と、総務省の法律概要 https://www.soumu.go.jp/main_content/001063704.pdf の「74万円（現行:65万円）…令和９年度分の個人住民税から適用」に基づく。実装する条文は特定できていない。220万円を境とする区分とその上の速算式は、現行の所得税法の式を流用し、220万円×30%+8万円=74万円から導いた値で、一次資料での照合は済んでいない。税率、均等割、基礎控除は令和8年度と同じ。含めないもの: 人的控除、税額控除、非課税限度額、分離課税、自治体独自の税率。"
+  },
+  "payload": {
+    "incomeLevyPercent": 10,
+    "perCapitaLevyYen": 4000,
+    "salaryDeductionBrackets": [
+      {
+        "overYen": 0,
+        "upToYen": 2200000,
+        "ratePercent": 0,
+        "constantYen": 740000
+      },
+      {
+        "overYen": 2200000,
+        "upToYen": 3600000,
+        "ratePercent": 30,
+        "constantYen": 80000
+      },
+      {
+        "overYen": 3600000,
+        "upToYen": 6600000,
+        "ratePercent": 20,
+        "constantYen": 440000
+      },
+      {
+        "overYen": 6600000,
+        "upToYen": 8500000,
+        "ratePercent": 10,
+        "constantYen": 1100000
+      },
+      {
+        "overYen": 8500000,
+        "upToYen": null,
+        "ratePercent": 0,
+        "constantYen": 1950000
+      }
+    ],
+    "salaryDeductionMinimumYen": 740000,
+    "basicDeductionBrackets": [
+      {
+        "overYen": 0,
+        "upToYen": 24000000,
+        "deductionYen": 430000
+      },
+      {
+        "overYen": 24000000,
+        "upToYen": 24500000,
+        "deductionYen": 290000
+      },
+      {
+        "overYen": 24500000,
+        "upToYen": 25000000,
+        "deductionYen": 150000
+      },
+      {
+        "overYen": 25000000,
+        "upToYen": null,
+        "deductionYen": 0
+      }
+    ]
+  }
+}

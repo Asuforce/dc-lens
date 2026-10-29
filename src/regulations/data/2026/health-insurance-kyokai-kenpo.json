@@ -1,0 +1,370 @@
+{
+  "meta": {
+    "version": "2026-04-kyokai-kenpo",
+    "kind": "health-insurance",
+    "effectiveFrom": "2026-04-01",
+    "effectiveTo": null,
+    "sourceName": "全国健康保険協会 令和8年度保険料額表・都道府県単位保険料率（健康保険料率・介護保険料率）",
+    "sourceUrl": "https://www.kyoukaikenpo.or.jp/about/business/insurance_rate/rate_prefectures/r08/index.html",
+    "verifiedAt": "2026-10-29",
+    "status": "verified",
+    "insurer": "kyokai-kenpo",
+    "note": "令和8年度（令和8年3月分〜）の協会けんぽ料率。日付は保険料の対象月（分）の初日で表す。子ども・子育て支援金率0.23%は令和8年4月分から適用のため、令和8年3月分は別データセットとした。等級・報酬月額は保険料額表（東京支部版PDF https://www.kyoukaikenpo.or.jp/assets/R8_13tokyo.pdf）の健康保険等級1〜50。等級表は全支部共通で、東京支部の9.85%・介護1.62%・支援金0.23%の記載は都道府県別率ページと一致。本人負担は折半額。端数は、事業主が給与から控除する場合は50銭以下切り捨て・50銭超切り上げ、被保険者が現金で支払う場合は50銭未満切り捨て・50銭以上切り上げ（特約があればそれに従う）。介護保険第2号被保険者は40歳から64歳。標準賞与額は賞与額から1,000円未満を切り捨てた額で、健康保険・介護保険・子ども・子育て支援金の上限は年間573万円（毎年4月1日から翌年3月31日までの累計額）。終了日は令和9年度料率の公表時に設定する。"
+  },
+  "payload": {
+    "grades": [
+      {
+        "grade": 1,
+        "standardMonthlyYen": 58000,
+        "lowerBoundYen": 0,
+        "upperBoundYen": 63000
+      },
+      {
+        "grade": 2,
+        "standardMonthlyYen": 68000,
+        "lowerBoundYen": 63000,
+        "upperBoundYen": 73000
+      },
+      {
+        "grade": 3,
+        "standardMonthlyYen": 78000,
+        "lowerBoundYen": 73000,
+        "upperBoundYen": 83000
+      },
+      {
+        "grade": 4,
+        "standardMonthlyYen": 88000,
+        "lowerBoundYen": 83000,
+        "upperBoundYen": 93000
+      },
+      {
+        "grade": 5,
+        "standardMonthlyYen": 98000,
+        "lowerBoundYen": 93000,
+        "upperBoundYen": 101000
+      },
+      {
+        "grade": 6,
+        "standardMonthlyYen": 104000,
+        "lowerBoundYen": 101000,
+        "upperBoundYen": 107000
+      },
+      {
+        "grade": 7,
+        "standardMonthlyYen": 110000,
+        "lowerBoundYen": 107000,
+        "upperBoundYen": 114000
+      },
+      {
+        "grade": 8,
+        "standardMonthlyYen": 118000,
+        "lowerBoundYen": 114000,
+        "upperBoundYen": 122000
+      },
+      {
+        "grade": 9,
+        "standardMonthlyYen": 126000,
+        "lowerBoundYen": 122000,
+        "upperBoundYen": 130000
+      },
+      {
+        "grade": 10,
+        "standardMonthlyYen": 134000,
+        "lowerBoundYen": 130000,
+        "upperBoundYen": 138000
+      },
+      {
+        "grade": 11,
+        "standardMonthlyYen": 142000,
+        "lowerBoundYen": 138000,
+        "upperBoundYen": 146000
+      },
+      {
+        "grade": 12,
+        "standardMonthlyYen": 150000,
+        "lowerBoundYen": 146000,
+        "upperBoundYen": 155000
+      },
+      {
+        "grade": 13,
+        "standardMonthlyYen": 160000,
+        "lowerBoundYen": 155000,
+        "upperBoundYen": 165000
+      },
+      {
+        "grade": 14,
+        "standardMonthlyYen": 170000,
+        "lowerBoundYen": 165000,
+        "upperBoundYen": 175000
+      },
+      {
+        "grade": 15,
+        "standardMonthlyYen": 180000,
+        "lowerBoundYen": 175000,
+        "upperBoundYen": 185000
+      },
+      {
+        "grade": 16,
+        "standardMonthlyYen": 190000,
+        "lowerBoundYen": 185000,
+        "upperBoundYen": 195000
+      },
+      {
+        "grade": 17,
+        "standardMonthlyYen": 200000,
+        "lowerBoundYen": 195000,
+        "upperBoundYen": 210000
+      },
+      {
+        "grade": 18,
+        "standardMonthlyYen": 220000,
+        "lowerBoundYen": 210000,
+        "upperBoundYen": 230000
+      },
+      {
+        "grade": 19,
+        "standardMonthlyYen": 240000,
+        "lowerBoundYen": 230000,
+        "upperBoundYen": 250000
+      },
+      {
+        "grade": 20,
+        "standardMonthlyYen": 260000,
+        "lowerBoundYen": 250000,
+        "upperBoundYen": 270000
+      },
+      {
+        "grade": 21,
+        "standardMonthlyYen": 280000,
+        "lowerBoundYen": 270000,
+        "upperBoundYen": 290000
+      },
+      {
+        "grade": 22,
+        "standardMonthlyYen": 300000,
+        "lowerBoundYen": 290000,
+        "upperBoundYen": 310000
+      },
+      {
+        "grade": 23,
+        "standardMonthlyYen": 320000,
+        "lowerBoundYen": 310000,
+        "upperBoundYen": 330000
+      },
+      {
+        "grade": 24,
+        "standardMonthlyYen": 340000,
+        "lowerBoundYen": 330000,
+        "upperBoundYen": 350000
+      },
+      {
+        "grade": 25,
+        "standardMonthlyYen": 360000,
+        "lowerBoundYen": 350000,
+        "upperBoundYen": 370000
+      },
+      {
+        "grade": 26,
+        "standardMonthlyYen": 380000,
+        "lowerBoundYen": 370000,
+        "upperBoundYen": 395000
+      },
+      {
+        "grade": 27,
+        "standardMonthlyYen": 410000,
+        "lowerBoundYen": 395000,
+        "upperBoundYen": 425000
+      },
+      {
+        "grade": 28,
+        "standardMonthlyYen": 440000,
+        "lowerBoundYen": 425000,
+        "upperBoundYen": 455000
+      },
+      {
+        "grade": 29,
+        "standardMonthlyYen": 470000,
+        "lowerBoundYen": 455000,
+        "upperBoundYen": 485000
+      },
+      {
+        "grade": 30,
+        "standardMonthlyYen": 500000,
+        "lowerBoundYen": 485000,
+        "upperBoundYen": 515000
+      },
+      {
+        "grade": 31,
+        "standardMonthlyYen": 530000,
+        "lowerBoundYen": 515000,
+        "upperBoundYen": 545000
+      },
+      {
+        "grade": 32,
+        "standardMonthlyYen": 560000,
+        "lowerBoundYen": 545000,
+        "upperBoundYen": 575000
+      },
+      {
+        "grade": 33,
+        "standardMonthlyYen": 590000,
+        "lowerBoundYen": 575000,
+        "upperBoundYen": 605000
+      },
+      {
+        "grade": 34,
+        "standardMonthlyYen": 620000,
+        "lowerBoundYen": 605000,
+        "upperBoundYen": 635000
+      },
+      {
+        "grade": 35,
+        "standardMonthlyYen": 650000,
+        "lowerBoundYen": 635000,
+        "upperBoundYen": 665000
+      },
+      {
+        "grade": 36,
+        "standardMonthlyYen": 680000,
+        "lowerBoundYen": 665000,
+        "upperBoundYen": 695000
+      },
+      {
+        "grade": 37,
+        "standardMonthlyYen": 710000,
+        "lowerBoundYen": 695000,
+        "upperBoundYen": 730000
+      },
+      {
+        "grade": 38,
+        "standardMonthlyYen": 750000,
+        "lowerBoundYen": 730000,
+        "upperBoundYen": 770000
+      },
+      {
+        "grade": 39,
+        "standardMonthlyYen": 790000,
+        "lowerBoundYen": 770000,
+        "upperBoundYen": 810000
+      },
+      {
+        "grade": 40,
+        "standardMonthlyYen": 830000,
+        "lowerBoundYen": 810000,
+        "upperBoundYen": 855000
+      },
+      {
+        "grade": 41,
+        "standardMonthlyYen": 880000,
+        "lowerBoundYen": 855000,
+        "upperBoundYen": 905000
+      },
+      {
+        "grade": 42,
+        "standardMonthlyYen": 930000,
+        "lowerBoundYen": 905000,
+        "upperBoundYen": 955000
+      },
+      {
+        "grade": 43,
+        "standardMonthlyYen": 980000,
+        "lowerBoundYen": 955000,
+        "upperBoundYen": 1005000
+      },
+      {
+        "grade": 44,
+        "standardMonthlyYen": 1030000,
+        "lowerBoundYen": 1005000,
+        "upperBoundYen": 1055000
+      },
+      {
+        "grade": 45,
+        "standardMonthlyYen": 1090000,
+        "lowerBoundYen": 1055000,
+        "upperBoundYen": 1115000
+      },
+      {
+        "grade": 46,
+        "standardMonthlyYen": 1150000,
+        "lowerBoundYen": 1115000,
+        "upperBoundYen": 1175000
+      },
+      {
+        "grade": 47,
+        "standardMonthlyYen": 1210000,
+        "lowerBoundYen": 1175000,
+        "upperBoundYen": 1235000
+      },
+      {
+        "grade": 48,
+        "standardMonthlyYen": 1270000,
+        "lowerBoundYen": 1235000,
+        "upperBoundYen": 1295000
+      },
+      {
+        "grade": 49,
+        "standardMonthlyYen": 1330000,
+        "lowerBoundYen": 1295000,
+        "upperBoundYen": 1355000
+      },
+      {
+        "grade": 50,
+        "standardMonthlyYen": 1390000,
+        "lowerBoundYen": 1355000,
+        "upperBoundYen": null
+      }
+    ],
+    "annualBonusCapYen": 5730000,
+    "careTotalRatePercent": 1.62,
+    "childSupportTotalRatePercent": 0.23,
+    "healthTotalRatePercentByPrefecture": {
+      "hokkaido": 10.28,
+      "aomori": 9.85,
+      "iwate": 9.51,
+      "miyagi": 10.1,
+      "akita": 10.01,
+      "yamagata": 9.75,
+      "fukushima": 9.5,
+      "ibaraki": 9.52,
+      "tochigi": 9.82,
+      "gunma": 9.68,
+      "saitama": 9.67,
+      "chiba": 9.73,
+      "tokyo": 9.85,
+      "kanagawa": 9.92,
+      "niigata": 9.21,
+      "toyama": 9.59,
+      "ishikawa": 9.7,
+      "fukui": 9.71,
+      "yamanashi": 9.55,
+      "nagano": 9.63,
+      "gifu": 9.8,
+      "shizuoka": 9.61,
+      "aichi": 9.93,
+      "mie": 9.77,
+      "shiga": 9.88,
+      "kyoto": 9.89,
+      "osaka": 10.13,
+      "hyogo": 10.12,
+      "nara": 9.91,
+      "wakayama": 10.06,
+      "tottori": 9.86,
+      "shimane": 9.94,
+      "okayama": 10.05,
+      "hiroshima": 9.78,
+      "yamaguchi": 10.15,
+      "tokushima": 10.24,
+      "kagawa": 10.02,
+      "ehime": 9.98,
+      "kochi": 10.05,
+      "fukuoka": 10.11,
+      "saga": 10.55,
+      "nagasaki": 10.06,
+      "kumamoto": 10.08,
+      "oita": 10.08,
+      "miyazaki": 9.77,
+      "kagoshima": 10.13,
+      "okinawa": 9.44
+    }
+  }
+}
