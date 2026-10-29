@@ -92,7 +92,18 @@ export function createForm(prefectures: string[]): HTMLFormElement {
   form.noValidate = true;
   const grid = document.createElement("div");
   grid.className = "form-grid";
-  for (const [name, label] of fields) {
+  const groups = ["本人情報", "収入", "掛金とコスト", "運用の仮定", "評価"].map((title) => {
+    const group = document.createElement("fieldset");
+    const legend = document.createElement("legend");
+    legend.textContent = title;
+    group.append(legend);
+    const container = document.createElement("div");
+    container.className = "form-grid";
+    group.append(container);
+    form.append(group);
+    return container;
+  });
+  for (const [index, [name, label]] of fields.entries()) {
     const l = document.createElement("label");
     l.textContent = label;
     const i = document.createElement("input");
@@ -100,7 +111,7 @@ export function createForm(prefectures: string[]): HTMLFormElement {
     i.type = "number";
     i.step = "any";
     l.append(i);
-    grid.append(l);
+    groups[index < 4 ? 0 : index < 8 ? 1 : index < 14 ? 2 : 3]?.append(l);
   }
   grid.append(
     select("prefecture", "都道府県", [
@@ -125,7 +136,12 @@ export function createForm(prefectures: string[]): HTMLFormElement {
       ["present-value", "現在価値"],
     ]),
   );
-  form.append(grid);
+  for (const label of Array.from(grid.children)) {
+    const name = label.querySelector("select")?.name;
+    groups[name === "prefecture" || name === "insurer" ? 0 : name === "bonusMode" ? 1 : 4]?.append(
+      label,
+    );
+  }
   const events = document.createElement("fieldset");
   const legend = document.createElement("legend");
   legend.textContent = "昇給イベント";
