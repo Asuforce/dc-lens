@@ -1,10 +1,190 @@
 :root {
-  color-scheme: light dark;
   font-family: system-ui, sans-serif;
+  color: #182a31;
+  background: #f5f7f5;
   line-height: 1.6;
+  color-scheme: light dark;
+}
+* {
+  box-sizing: border-box;
 }
 body {
-  margin: 0 auto;
-  max-width: 48rem;
+  margin: 0;
+}
+header {
+  background: #183c46;
+  color: #fff;
+  padding: 1.5rem 0;
+}
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+h1 {
+  margin-bottom: 0.2rem;
+}
+.container {
+  width: min(100% - 2rem, 70rem);
+  margin: auto;
+}
+main {
+  padding-block: 1.5rem;
+}
+section {
+  margin-block: 1.5rem;
+}
+.privacy {
+  border-left: 0.3rem solid #007564;
+  padding: 0.8rem;
+  background: #e2f2ed;
+  color: #163d35;
+}
+.form-grid,
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 1rem;
+}
+label {
+  display: grid;
+  gap: 0.25rem;
+  font-weight: 600;
+}
+input,
+select,
+button {
+  font: inherit;
+  padding: 0.6rem;
+  border: 1px solid #62777b;
+  border-radius: 0.25rem;
+  max-width: 100%;
+  background: #fff;
+  color: #182a31;
+}
+button {
+  cursor: pointer;
+  background: #145f55;
+  color: #fff;
+  border-color: #145f55;
+  font-weight: 700;
+}
+button:hover {
+  background: #104a43;
+}
+:focus-visible {
+  outline: 3px solid #c36a00;
+  outline-offset: 3px;
+}
+fieldset {
+  margin: 1rem 0;
+  border: 1px solid #a1afad;
+}
+.event {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block: 0.5rem;
+}
+.cards > div {
+  background: #e9efed;
   padding: 1rem;
+  border-top: 3px solid #145f55;
+}
+.cards h3 {
+  font-size: 1rem;
+}
+.cards p {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+}
+#errors:not(:empty) {
+  padding: 1rem;
+  background: #ffe9df;
+  color: #742b13;
+}
+details {
+  margin-block: 1rem;
+  overflow-x: auto;
+}
+summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+table {
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+th,
+td {
+  text-align: left;
+  padding: 0.5rem;
+  border: 1px solid #9caeaa;
+  white-space: nowrap;
+}
+svg {
+  display: block;
+  width: 100%;
+  max-width: 800px;
+  overflow: visible;
+}
+svg text {
+  font-size: 11px;
+  fill: currentColor;
+}
+.axis {
+  stroke: #80948f;
+  stroke-width: 1;
+}
+.series {
+  fill: none;
+  stroke-width: 3;
+}
+.first {
+  stroke: #007564;
+}
+.second {
+  stroke: #a84316;
+  stroke-dasharray: 7 4;
+}
+.information {
+  border-top: 1px solid #9caeaa;
+}
+.skip {
+  position: absolute;
+  left: -10000px;
+}
+.skip:focus {
+  left: 1rem;
+  top: 1rem;
+  background: white;
+  color: #111;
+  z-index: 2;
+}
+footer {
+  padding-bottom: 2rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #eef5f1;
+    background: #142328;
+  }
+  .cards > div {
+    background: #243c3c;
+  }
+  .privacy {
+    background: #214a40;
+    color: #fff;
+  }
+  a {
+    color: #a8dfff;
+  }
+  .first {
+    stroke: #72e1c7;
+  }
+  .second {
+    stroke: #ffb58f;
+  }
 }
