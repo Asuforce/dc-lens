@@ -13,10 +13,10 @@ export interface ScenarioEntry {
 export const defaultLabel = (n: number): string => `シナリオ ${n}`;
 export function addScenario(list: ScenarioEntry[], entry: ScenarioEntry, max = 4): ScenarioEntry[] {
   if (list.length >= max) return list;
-  return [
-    ...list,
-    { ...entry, label: entry.label.trim().slice(0, 40).trim() || defaultLabel(entry.id) },
-  ];
+  const used = new Set(list.map((item) => item.label));
+  let n = 1;
+  while (used.has(defaultLabel(n))) n += 1;
+  return [...list, { ...entry, label: entry.label.trim().slice(0, 40).trim() || defaultLabel(n) }];
 }
 export function removeScenario(list: ScenarioEntry[], id: number): ScenarioEntry[] {
   return list.filter((entry) => entry.id !== id);
@@ -62,7 +62,7 @@ export function renderScenarioTable(
       "掛金（DC / iDeCo 月額）",
       (e) => `${yen(e.contributions.dcMonthlyYen)} / ${yen(e.contributions.idecoMonthlyYen)}`,
     ],
-    ["想定利回り", (e) => `${e.grossAnnualReturn * 100}%`],
+    ["想定利回り", (e) => `${Number((e.grossAnnualReturn * 100).toFixed(4))}%`],
     ["制度データ版", (e) => e.regulationVersion],
   ];
   for (const [label, value] of rows) {

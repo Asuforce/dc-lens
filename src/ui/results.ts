@@ -92,6 +92,7 @@ export function renderResults(
   root.append(cards);
   const download = document.createElement("button");
   download.type = "button";
+  download.id = "csv-download";
   download.textContent = "CSVをダウンロード";
   download.addEventListener("click", () => {
     const url = URL.createObjectURL(

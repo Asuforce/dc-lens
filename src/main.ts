@@ -66,6 +66,12 @@ if (!resolved.ok) {
     }
     try {
       const result = simulate(parsed.input, set);
+      const transferView = parsed.transfer
+        ? renderTransfer(compareTransfer(parsed.transfer))
+        : null;
+      const payoutView = parsed.payout
+        ? renderPayout(afterTaxPayout(result, parsed.input, parsed.payout.priorServiceYears, set))
+        : null;
       output.append(
         renderResults(
           result,
@@ -74,11 +80,8 @@ if (!resolved.ok) {
           parsed.input.assumptions.valuation,
         ),
       );
-      if (parsed.transfer) output.append(renderTransfer(compareTransfer(parsed.transfer)));
-      if (parsed.payout)
-        output.append(
-          renderPayout(afterTaxPayout(result, parsed.input, parsed.payout.priorServiceYears, set)),
-        );
+      if (transferView) output.append(transferView);
+      if (payoutView) output.append(payoutView);
       const label = document.createElement("label");
       label.textContent = "シナリオ名";
       const input = document.createElement("input");
@@ -107,7 +110,7 @@ if (!resolved.ok) {
         status.textContent = "シナリオを追加しました。";
         renderComparison();
       });
-      const download = output.querySelector("button");
+      const download = output.querySelector("#csv-download");
       download?.after(label, button);
       submitted = true;
     } catch (e) {

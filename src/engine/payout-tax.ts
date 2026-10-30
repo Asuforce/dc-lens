@@ -38,7 +38,9 @@ export function lumpSumTax(
     0,
     Math.floor((taxableRetirementIncomeYen * bracket.ratePercent) / 100) - bracket.deductionYen,
   );
-  const incomeTaxYen = Math.floor((base * (100 + set.incomeTax.surtaxTotalPercent)) / 100);
+  const incomeTaxYen = Math.floor(
+    (base * Math.round((100 + set.incomeTax.surtaxTotalPercent) * 1000)) / 100000,
+  );
   const residentTaxPrefecturalYen = floorTo(
     100,
     (taxableRetirementIncomeYen * p.residentPrefecturalPercent) / 100,

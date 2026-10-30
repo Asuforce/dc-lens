@@ -38,4 +38,11 @@ describe("scenarios", () => {
     expect(removeScenario(list, 1)).toHaveLength(3);
     expect(list).toHaveLength(4);
   });
+  it("names unnamed scenarios with the smallest unused number", () => {
+    const blank = { ...entry, label: "" };
+    const first = addScenario([], { ...blank, id: 1 });
+    const second = addScenario(first, { ...blank, id: 2 });
+    const third = addScenario(removeScenario(second, 1), { ...blank, id: 3 });
+    expect(third.map((item) => item.label)).toEqual([defaultLabel(2), defaultLabel(1)]);
+  });
 });

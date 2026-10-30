@@ -107,8 +107,8 @@ export function resolveRegulationSet(
   }
   if (errors.length > 0) return { ok: false, errors };
 
-  const limit = selectDataset(datasets, "contribution-limit", baseDate, "draft");
-  if (limit.ok && limit.dataset.meta.status !== "provisional") {
+  const limit = selectDataset(datasets, "contribution-limit", baseDate, mode);
+  if (limit.ok) {
     picked.set("contribution-limit", limit.dataset);
   }
   const get = <P>(kind: DatasetKind): P => (picked.get(kind) as Dataset<P>).payload;

@@ -29,4 +29,9 @@ describe("一時金課税", () => {
     expect(result.taxableRetirementIncomeYen).toBe(3800000);
     expect(result.incomeTaxYen).toBe(339482);
   });
+  it("復興等の加算を整数演算で求める", () => {
+    const result = lumpSumTax({ lumpSumYen: 800000 + 2 * 820000, serviceYears: 2 }, set);
+    expect(result.taxableRetirementIncomeYen).toBe(820000);
+    expect(result.incomeTaxYen).toBe(41861);
+  });
 });
