@@ -338,8 +338,21 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
   if (plan.initialBalanceYen > 0) {
     warnings.push("初期運用資産は比較に含めていません。既存資産の移換は新規掛金とは別の判断です。");
   }
+  if (set.contributionLimit) {
+    for (const [name, amount, cap] of [
+      ["選択制DC", plan.dcMonthlyContributionYen, set.contributionLimit.payload.dcMonthlyYen],
+      ["iDeCo", plan.idecoMonthlyContributionYen, set.contributionLimit.payload.idecoMonthlyYen],
+    ] as const) {
+      if (amount > cap)
+        warnings.push(
+          `${name}の月額掛金${amount}円は上限${cap}円を超えています。他制度への加入がない場合の上限です。`,
+        );
+    }
+  }
   warnings.push(
-    "拠出限度額と加入資格は確認していません。勤務先の規程と制度の上限を別途確認してください。",
+    set.contributionLimit
+      ? "加入資格と他制度の掛金は確認していません。"
+      : "拠出限度額と加入資格は確認していません。勤務先の規程と制度の上限を別途確認してください。",
     "インフレ率は計算に使用していません。現在価値は割引率のみで求めます。",
     "老齢厚生年金以外の給付(障害・遺族)や健康保険の給付への影響は対象外です。",
   );

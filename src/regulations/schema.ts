@@ -7,6 +7,7 @@ export const DATASET_KINDS = [
   "income-tax",
   "resident-tax",
   "pension-benefit",
+  "contribution-limit",
 ] as const;
 export type DatasetKind = (typeof DATASET_KINDS)[number];
 
@@ -79,6 +80,11 @@ export interface ResidentTaxPayload {
   salaryDeductionBrackets: SalaryDeductionBracket[];
   salaryDeductionMinimumYen: number;
   basicDeductionBrackets: BasicDeductionBracket[];
+}
+
+export interface ContributionLimitPayload {
+  dcMonthlyYen: number;
+  idecoMonthlyYen: number;
 }
 
 export interface PensionBenefitPayload {
@@ -342,12 +348,24 @@ export function validatePensionBenefit(raw: unknown): ValidationResult<PensionBe
   return finish(errors, raw);
 }
 
+export function validateContributionLimit(
+  raw: unknown,
+): ValidationResult<ContributionLimitPayload> {
+  if (!isRecord(raw)) return { ok: false, errors: ["payload must be an object"] };
+  const errors: string[] = [];
+  for (const key of ["dcMonthlyYen", "idecoMonthlyYen"]) {
+    if (!isNonNegInt(raw[key]) || raw[key] === 0) errors.push(`${key} must be a positive integer`);
+  }
+  return finish(errors, raw);
+}
+
 const PAYLOAD_VALIDATORS: Record<DatasetKind, (raw: unknown) => ValidationResult<unknown>> = {
   "pension-insurance": validatePensionInsurance,
   "health-insurance": validateHealthInsurance,
   "income-tax": validateIncomeTax,
   "resident-tax": validateResidentTax,
   "pension-benefit": validatePensionBenefit,
+  "contribution-limit": validateContributionLimit,
 };
 
 export function validateDataset(raw: unknown): ValidationResult<Dataset> {

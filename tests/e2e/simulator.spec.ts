@@ -248,3 +248,13 @@ test("compares session scenarios without persistence or requests", async ({ page
     expect(request.method).toBe("GET");
   }
 });
+
+test("warns when DC contribution exceeds the cap", async ({ page }) => {
+  await page.goto("/");
+  await fill(page);
+  await page.locator('[name="dcContribution"]').fill("70000");
+  await page.getByRole("button", { name: "比較する" }).click();
+  await expect(
+    page.getByText("選択制DCの月額掛金70000円は上限55000円を超えています。", { exact: false }),
+  ).toBeVisible();
+});

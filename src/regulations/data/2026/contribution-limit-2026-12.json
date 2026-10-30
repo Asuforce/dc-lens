@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "version": "2026-12",
+    "kind": "contribution-limit",
+    "effectiveFrom": "2026-12-01",
+    "effectiveTo": null,
+    "status": "planned",
+    "verifiedAt": "2026-10-30",
+    "sourceName": "令和7年政令第442号による確定拠出年金法施行令の改正(施行 令和8年12月1日)、厚生労働省",
+    "sourceUrl": "https://www.mhlw.go.jp/content/12500000/001723426.pdf",
+    "note": "DC令11条一号「六万二千円」、36条二号「六万二千円」、改正附則「令和八年十二月一日」。厚労省リーフレット https://www.mhlw.go.jp/content/12500000/001620594.pdf 「企業年金がないサラリーマンの方の毎月の拠出限度額は 23,000円から62,000円にアップ」。iDeCoの企業型DCのみ・DB等ありの区分の上限（62,000円から事業主掛金/他制度掛金相当額を控除）は未対応。2026-12-01以降に再検証しverifiedに変更する。"
+  },
+  "payload": {
+    "dcMonthlyYen": 62000,
+    "idecoMonthlyYen": 62000
+  }
+}
