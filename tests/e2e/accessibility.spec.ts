@@ -14,6 +14,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       await fill(page);
       await page.getByRole("button", { name: "比較する" }).click();
       await expect(page.locator("#summary")).toBeVisible();
+      await page.getByRole("button", { name: "このシナリオを比較に追加" }).click();
       for (const details of await page.locator("#summary details").all())
         await details.locator("summary").click();
       expect((await scan()).violations).toEqual([]);
