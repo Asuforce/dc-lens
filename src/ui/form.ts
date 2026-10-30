@@ -262,19 +262,7 @@ export function createForm(prefectures: string[]): HTMLFormElement {
   payoutToggle.type = "checkbox";
   payoutToggle.name = "payoutEnabled";
   payoutLabel.append(payoutToggle, document.createTextNode("一時金で受け取る場合の課税も試算する"));
-  const yearsLabel = document.createElement("label");
-  yearsLabel.textContent = "すでに拠出した年数（勤続年数に加算）";
-  const years = document.createElement("input");
-  years.type = "number";
-  years.name = "priorServiceYears";
-  years.min = "0";
-  years.step = "1";
-  yearsLabel.append(years);
-  yearsLabel.hidden = true;
-  payoutToggle.addEventListener("change", () => {
-    yearsLabel.hidden = !payoutToggle.checked;
-  });
-  payout.append(payoutLegend, payoutLabel, yearsLabel);
+  payout.append(payoutLegend, payoutLabel);
   form.append(payout);
   const button = document.createElement("button");
   button.type = "submit";
@@ -312,7 +300,6 @@ export function readForm(form: HTMLFormElement, version: string): FormValues {
     fixedFee: get("fixedFee"),
     transferEnabled: data.has("transferEnabled"),
     payoutEnabled: data.has("payoutEnabled"),
-    priorServiceYears: get("priorServiceYears"),
     transferBalance: get("transferBalance"),
     transferFee: get("transferFee"),
     idleMonths: get("idleMonths"),

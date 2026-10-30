@@ -70,7 +70,7 @@ if (!resolved.ok) {
         ? renderTransfer(compareTransfer(parsed.transfer))
         : null;
       const payoutView = parsed.payout
-        ? renderPayout(afterTaxPayout(result, parsed.input, parsed.payout.priorServiceYears, set))
+        ? renderPayout(afterTaxPayout(result, parsed.input, set))
         : null;
       output.append(
         renderResults(

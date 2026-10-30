@@ -125,8 +125,16 @@ export function resolveRegulationSet(
       );
     }
   }
-  if (!picked.has("contribution-limit"))
-    warnings.push("拠出限度額の制度データがないため、限度額は確認していません。");
+  if (!picked.has("contribution-limit")) {
+    const detail = limit.ok
+      ? ""
+      : limit.reason === "not-verified"
+        ? `（${limit.detail}）`
+        : limit.reason === "invalid"
+          ? `（${limit.detail}。期間が重複しています）`
+          : "";
+    warnings.push(`拠出限度額は検証済みのデータがないため、限度額は確認していません${detail}。`);
+  }
   for (const d of picked.values()) {
     if (d.meta.effectiveTo !== null) {
       warnings.push(

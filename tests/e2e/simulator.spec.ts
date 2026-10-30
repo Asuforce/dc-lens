@@ -42,7 +42,6 @@ test("shows optional payout tax without sending or storing inputs", async ({ pag
   await fill(page);
   const toggle = page.getByLabel("一時金で受け取る場合の課税も試算する");
   await toggle.check();
-  await page.getByLabel("すでに拠出した年数（勤続年数に加算）").fill("3");
   await page.getByRole("button", { name: "比較する" }).click();
   const payout = page.locator("#payout-result");
   await expect(payout.getByRole("heading", { name: "一時金受取時の課税（試算）" })).toBeVisible();
