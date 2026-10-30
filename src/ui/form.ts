@@ -270,6 +270,10 @@ export function createForm(prefectures: string[]): HTMLFormElement {
   years.min = "0";
   years.step = "1";
   yearsLabel.append(years);
+  yearsLabel.hidden = true;
+  payoutToggle.addEventListener("change", () => {
+    yearsLabel.hidden = !payoutToggle.checked;
+  });
   payout.append(payoutLegend, payoutLabel, yearsLabel);
   form.append(payout);
   const button = document.createElement("button");
