@@ -1,6 +1,21 @@
 import { expect, test } from "@playwright/test";
 import { fill } from "./helpers.ts";
 
+test("custom insurer rates remain local and appear in evidence", async ({ page }) => {
+  const requests: string[] = [];
+  page.on("request", (r) => requests.push(`${r.url()} ${r.postData() ?? ""}`));
+  await page.goto("/");
+  await fill(page);
+  await page.locator('[name="insurer"]').selectOption("kenpo-kumiai");
+  await page.locator('[name="healthTotalRatePercent"]').fill("9.0");
+  await page.locator('[name="careTotalRatePercent"]').fill("1.6");
+  await page.locator('[name="childSupportTotalRatePercent"]').fill("0.2");
+  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByText("計算根拠", { exact: true }).click();
+  await expect(page.locator("#summary")).toContainText("健康保険料率: 利用者入力");
+  expect(requests.join(" ")).not.toMatch(/9\.0|1\.6|0\.2/);
+});
+
 test("submits, updates results, and exposes sources without sending inputs", async ({
   page,
   baseURL,

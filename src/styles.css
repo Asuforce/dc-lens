@@ -41,6 +41,10 @@ section {
   background: #e2f2ed;
   color: #163d35;
 }
+.form-grid[hidden] {
+  display: none;
+}
+
 .form-grid,
 .cards {
   display: grid;
