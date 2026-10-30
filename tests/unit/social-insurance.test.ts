@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   annualSocialInsurance,
+  annualSocialInsuranceMonthly,
   findGrade,
   halfPremiumYen,
   standardBonusYen,
@@ -29,6 +30,44 @@ const input = {
 };
 
 describe("social insurance", () => {
+  it("matches annual calculations for constant monthly standards", () => {
+    for (const age of [39, 45])
+      for (const remuneration of [100000, 200000, 300000]) {
+        const annual = annualSocialInsurance(set, {
+          ...input,
+          age,
+          monthlyRemunerationYen: remuneration,
+        });
+        const monthly = annualSocialInsuranceMonthly(set, {
+          ...input,
+          age,
+          pensionStandardMonthlyYen: Array<number>(12).fill(annual.pensionStandardMonthlyYen),
+          healthStandardMonthlyYen: Array<number>(12).fill(annual.healthStandardMonthlyYen),
+        });
+        expect(monthly).toEqual(annual);
+      }
+  });
+  it("sums monthly premiums after a grade change and checks lengths", () => {
+    const standards = [...Array<number>(6).fill(100000), ...Array<number>(6).fill(200000)];
+    const args = {
+      ...input,
+      bonusPaymentsYen: [],
+      pensionStandardMonthlyYen: standards,
+      healthStandardMonthlyYen: standards,
+    };
+    expect(annualSocialInsuranceMonthly(set, args).pensionEmployeeYen).toBe(
+      standards.reduce(
+        (sum, value) => sum + halfPremiumYen(value, set.pension.totalRatePercent),
+        0,
+      ),
+    );
+    expect(() =>
+      annualSocialInsuranceMonthly(set, { ...args, pensionStandardMonthlyYen: [] }),
+    ).toThrow(RangeError);
+    expect(() =>
+      annualSocialInsuranceMonthly(set, { ...args, healthStandardMonthlyYen: [1] }),
+    ).toThrow(RangeError);
+  });
   it("selects grades at boundaries and rejects invalid remuneration", () => {
     for (const [value, grade] of [
       [0, 1],
