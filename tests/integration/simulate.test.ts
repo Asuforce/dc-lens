@@ -77,6 +77,63 @@ describe("annualSocialInsurance against bundled 2026 data (hand-derived)", () =>
 });
 
 describe("simulate", () => {
+  it("preserves simple summary", () => {
+    expect(simulate(baseInput(), set).summary).toEqual({
+      annualPensionDifferenceAtRetirementYen: -32886,
+      breakEvenAge: 82,
+      currentAnnualDifferenceYen: 21656,
+      lifetimeNominalDifferenceYen: -247870,
+      lifetimePresentValueDifferenceYen: 94506,
+      retirementAssetDifferenceYen: 0,
+    });
+  });
+  it("calculates monthly standards and gross for detailed raises", () => {
+    const input = baseInput();
+    input.salary.annualRaiseRate = 0.02;
+    const simple = simulate(input, set);
+    input.assumptions.mode = "detailed";
+    input.salary.raiseMonth = 4;
+    const result = simulate(input, set);
+    expect(result.yearlyResults[2]?.ideco.breakdown.socialInsuranceYen).toBeLessThan(
+      simple.yearlyResults[2]?.ideco.breakdown.socialInsuranceYen ?? 0,
+    );
+    for (const row of result.yearlyResults.filter((r) => r.age < input.profile.retirementAge)) {
+      for (const scenario of [row.dc, row.ideco]) {
+        expect(scenario.monthlyStandardRemuneration?.pension).toHaveLength(12);
+        expect(scenario.monthlyStandardRemuneration?.health).toHaveLength(12);
+      }
+    }
+    expect(simple.yearlyResults[0]?.dc.monthlyStandardRemuneration).toBeUndefined();
+    expect(result.yearlyResults.at(-1)?.dc.monthlyStandardRemuneration).toBeUndefined();
+    for (const value of Object.values(result.summary))
+      if (value !== null) expect(Number.isFinite(value)).toBe(true);
+    expect(result.assumptions.some((a) => a.includes("年間を通じて同じ"))).toBe(false);
+  });
+  it("matches scenarios with zero contributions in detailed mode", () => {
+    const input = baseInput({ dcMonthlyContributionYen: 0, idecoMonthlyContributionYen: 0 });
+    input.assumptions.mode = "detailed";
+    for (const row of simulate(input, set).yearlyResults) expect(row.dc).toEqual(row.ideco);
+  });
+  it("updates two-grade changes in April and one-grade changes in September", () => {
+    const input = baseInput();
+    input.assumptions.mode = "detailed";
+    for (const [contribution, month] of [
+      [40000, 3],
+      [20000, 8],
+    ] as const) {
+      input.plan.dcMonthlyContributionYen = contribution;
+      const values =
+        simulate(input, set).yearlyResults[0]?.dc.monthlyStandardRemuneration?.pension ?? [];
+      expect(values[month - 1]).toBe(300000);
+      expect(values[month]).toBeLessThan(300000);
+    }
+  });
+  it("validates the detailed raise month", () => {
+    const input = baseInput();
+    input.assumptions.mode = "detailed";
+    input.salary.raiseMonth = 13;
+    expect(() => simulate(input, set)).toThrow("昇給月は1から12の整数");
+  });
   it("calculates payout from the last working balances without changing the simulation", () => {
     const input = baseInput({ dcAnnualCostRate: 0.02 });
     const result = simulate(input, set);

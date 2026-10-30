@@ -1,9 +1,14 @@
 import type { RegulationSet } from "../regulations/loader.ts";
 import { cumulative, findBreakEvenAge, presentValueYen } from "./comparison.ts";
+import { scheduleStandardRemuneration } from "./grade-schedule.ts";
 import { type InvestmentParams, simulateYear, validateInvestmentParams } from "./investment.ts";
-import { annualAccrualYen } from "./pension.ts";
+import { annualAccrualFromMonthlyYen, annualAccrualYen } from "./pension.ts";
 import { projectSalary, validateSalaryProfile } from "./salary.ts";
-import { annualSocialInsurance, type SocialInsuranceResult } from "./social-insurance.ts";
+import {
+  annualSocialInsurance,
+  annualSocialInsuranceMonthly,
+  type SocialInsuranceResult,
+} from "./social-insurance.ts";
 import { incomeTax, residentTax } from "./tax.ts";
 import type {
   ScenarioYearResult,
@@ -34,6 +39,11 @@ export const ASSUMPTIONS: readonly string[] = [
   "運用資産は税引前評価額で、受取時の課税は反映していません。",
   "運用利回りはシナリオ上の仮定で、将来の予測や保証ではありません。",
   "損益分岐年齢は、選択した評価基準の累積差が0を横切る最初の年齢です。",
+];
+const DETAILED_NOTES = [
+  "詳細モード: 定時決定(4〜6月の平均を9月に反映)と随時改定(固定的賃金の変動後3か月の平均で2等級以上の差があれば4か月目から反映)を月単位で扱います。",
+  "対象外: 上限・下限等級での1等級差の例外、支払基礎日数17日未満、非固定的賃金の増減のみの変動、短時間労働者の11日基準。賞与は標準報酬月額に含めません。",
+  "年初を基準に各暦年を1月から12月として扱い、開始時点の標準報酬月額は昇給・掛金の前の月給の等級とします。昇給月は入力値で、毎年同じ月に昇給するものとします。",
 ];
 
 export function validateSimulationInput(input: SimulationInput): string[] {
@@ -72,6 +82,12 @@ export function validateSimulationInput(input: SimulationInput): string[] {
     }
   }
   errors.push(...validateSalaryProfile(salary));
+  if (
+    assumptions.mode === "detailed" &&
+    salary.raiseMonth !== undefined &&
+    (!Number.isInteger(salary.raiseMonth) || salary.raiseMonth < 1 || salary.raiseMonth > 12)
+  )
+    errors.push("昇給月は1から12の整数で入力してください。");
   const contributions: [string, number][] = [
     ["選択制DC掛金", plan.dcMonthlyContributionYen],
     ["iDeCo掛金", plan.idecoMonthlyContributionYen],
@@ -158,6 +174,34 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
   };
 
   const working = projectSalary(profile, salary);
+  const detailed = assumptions.mode === "detailed";
+  const raiseMonth = salary.raiseMonth ?? 4;
+  const monthlySalary = working.flatMap((year, k) =>
+    Array.from({ length: 12 }, (_, month) =>
+      k > 0 && month < raiseMonth - 1
+        ? (working[k - 1]?.monthlySalaryYen ?? year.monthlySalaryYen)
+        : year.monthlySalaryYen,
+    ),
+  );
+  if (detailed && monthlySalary.some((value) => value < plan.dcMonthlyContributionYen)) {
+    throw new SimulationInputError(["選択制DC掛金が将来の月給を超えています。"]);
+  }
+  const changes = working.flatMap((_, k) => (k === 0 ? [] : [k * 12 + raiseMonth - 1]));
+  const standards = (contribution: number) => {
+    const monthlyRemunerationYen = monthlySalary.map((value) => value - contribution);
+    const fixedWageChangeMonthIndexes = contribution > 0 ? [0, ...changes] : changes;
+    const args = {
+      initialRemunerationYen: salary.monthlySalaryYen,
+      monthlyRemunerationYen,
+      fixedWageChangeMonthIndexes,
+    };
+    return {
+      pension: scheduleStandardRemuneration({ ...args, table: effectiveSet.pension }),
+      health: scheduleStandardRemuneration({ ...args, table: effectiveSet.health }),
+    };
+  };
+  const dcStandards = detailed ? standards(plan.dcMonthlyContributionYen) : undefined;
+  const idecoStandards = detailed ? standards(0) : undefined;
   const lastAge = Math.max(profile.pensionEndAge, profile.retirementAge) - 1;
   const dc: ScenarioState = { balanceYen: 0 };
   const ideco: ScenarioState = { balanceYen: 0 };
@@ -177,18 +221,40 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
     let idecoResult: ScenarioYearResult;
 
     if (y) {
+      const index = age - profile.age;
+      const slice = (s: { pension: number[]; health: number[] }) => ({
+        pension: s.pension.slice(index * 12, index * 12 + 12),
+        health: s.health.slice(index * 12, index * 12 + 12),
+      });
+      const dcMonthly = dcStandards && slice(dcStandards);
+      const idecoMonthly = idecoStandards && slice(idecoStandards);
+      const gross = detailed
+        ? monthlySalary.slice(index * 12, index * 12 + 12).reduce((a, b) => a + b, 0) +
+          y.annualBonusYen
+        : y.annualGrossYen;
       const bonus = splitBonus(y.annualBonusYen);
-      const siFor = (monthly: Yen): SocialInsuranceResult =>
-        annualSocialInsurance(effectiveSet, {
-          prefecture: custom ? "custom" : profile.prefecture,
-          age,
-          monthlyRemunerationYen: monthly,
-          bonusPaymentsYen: bonus,
-        });
+      const siFor = (
+        monthly: Yen,
+        standardsForYear?: { pension: number[]; health: number[] },
+      ): SocialInsuranceResult =>
+        standardsForYear
+          ? annualSocialInsuranceMonthly(effectiveSet, {
+              prefecture: custom ? "custom" : profile.prefecture,
+              age,
+              pensionStandardMonthlyYen: standardsForYear.pension,
+              healthStandardMonthlyYen: standardsForYear.health,
+              bonusPaymentsYen: bonus,
+            })
+          : annualSocialInsurance(effectiveSet, {
+              prefecture: custom ? "custom" : profile.prefecture,
+              age,
+              monthlyRemunerationYen: monthly,
+              bonusPaymentsYen: bonus,
+            });
 
-      const siDc = siFor(y.monthlySalaryYen - plan.dcMonthlyContributionYen);
-      const siIdeco = siFor(y.monthlySalaryYen);
-      const dcGross = y.annualGrossYen - dcAnnual;
+      const siDc = siFor(y.monthlySalaryYen - plan.dcMonthlyContributionYen, dcMonthly);
+      const siIdeco = siFor(y.monthlySalaryYen, idecoMonthly);
+      const dcGross = gross - dcAnnual;
       const dcIncome = incomeTax(
         {
           grossSalaryYen: dcGross,
@@ -207,7 +273,7 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
       );
       const idecoIncome = incomeTax(
         {
-          grossSalaryYen: y.annualGrossYen,
+          grossSalaryYen: gross,
           socialInsuranceYen: siIdeco.totalEmployeeYen,
           smallBusinessMutualAidYen: idecoAnnual,
         },
@@ -215,7 +281,7 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
       );
       const idecoResident = residentTax(
         {
-          grossSalaryYen: y.annualGrossYen,
+          grossSalaryYen: gross,
           socialInsuranceYen: siIdeco.totalEmployeeYen,
           smallBusinessMutualAidYen: idecoAnnual,
         },
@@ -255,11 +321,12 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
           trustFeeYen: dcFlow.trustFeeYen,
         },
         sources: versions,
+        ...(dcMonthly ? { monthlyStandardRemuneration: dcMonthly } : {}),
       };
       idecoResult = {
-        grossPayYen: y.annualGrossYen,
+        grossPayYen: gross,
         takeHomeYen:
-          y.annualGrossYen -
+          gross -
           siIdeco.totalEmployeeYen -
           idecoIncome.totalYen -
           idecoResident.totalYen -
@@ -274,20 +341,33 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
           trustFeeYen: idecoFlow.trustFeeYen,
         },
         sources: versions,
+        ...(idecoMonthly ? { monthlyStandardRemuneration: idecoMonthly } : {}),
       };
       accrualsDc.push(
-        annualAccrualYen(
-          set.pensionBenefit,
-          siDc.pensionStandardMonthlyYen,
-          siDc.pensionStandardBonusYen,
-        ),
+        dcMonthly
+          ? annualAccrualFromMonthlyYen(
+              set.pensionBenefit,
+              dcMonthly.pension,
+              siDc.pensionStandardBonusYen,
+            )
+          : annualAccrualYen(
+              set.pensionBenefit,
+              siDc.pensionStandardMonthlyYen,
+              siDc.pensionStandardBonusYen,
+            ),
       );
       accrualsIdeco.push(
-        annualAccrualYen(
-          set.pensionBenefit,
-          siIdeco.pensionStandardMonthlyYen,
-          siIdeco.pensionStandardBonusYen,
-        ),
+        idecoMonthly
+          ? annualAccrualFromMonthlyYen(
+              set.pensionBenefit,
+              idecoMonthly.pension,
+              siIdeco.pensionStandardBonusYen,
+            )
+          : annualAccrualYen(
+              set.pensionBenefit,
+              siIdeco.pensionStandardMonthlyYen,
+              siIdeco.pensionStandardBonusYen,
+            ),
       );
     } else {
       const dcFlow = simulateYear(dc.balanceYen, 0, dcParams);
@@ -324,7 +404,7 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
     yearly.push({
       year: baseYear + (age - profile.age),
       age,
-      salaryYen: y?.annualGrossYen ?? 0,
+      salaryYen: y ? (detailed ? dcResult.grossPayYen + dcAnnual : y.annualGrossYen) : 0,
       dc: dcResult,
       ideco: idecoResult,
       annualCashFlowDifferenceYen: dcResult.takeHomeYen - idecoResult.takeHomeYen,
@@ -369,6 +449,7 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
   });
 
   const warnings = [...set.warnings];
+  if (detailed) warnings.push(...DETAILED_NOTES);
   if (custom)
     warnings.push(
       "健康保険料率は利用者入力の値です。等級表と賞与上限は法定の共通表を使っています。",
@@ -409,7 +490,9 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
     },
     regulationVersion: versions.join(" / "),
     assumptions: [
-      ...ASSUMPTIONS,
+      ...(detailed
+        ? [...ASSUMPTIONS.slice(0, 2), ...DETAILED_NOTES, ...ASSUMPTIONS.slice(3)]
+        : ASSUMPTIONS),
       ...(custom
         ? [
             "健康保険料率は利用者入力の労使合計を折半します。事業主負担が大きい場合は本人料率の2倍を入力します。",

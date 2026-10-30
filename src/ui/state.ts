@@ -12,6 +12,8 @@ export interface FormValues {
   raiseRate: string;
   events: { age: string; rate: string }[];
   bonusMode: string;
+  mode?: string;
+  raiseMonth?: string;
   prefecture: string;
   insurer?: string;
   healthTotalRatePercent?: string;
@@ -99,6 +101,7 @@ export function parseForm(v: FormValues):
       bonusMode:
         v.bonusMode === "fixed-monthly-bonus-grows" ? "fixed-monthly-bonus-grows" : "fixed-ratio",
       monthlySalaryIsEstimated: estimated,
+      ...(v.mode === "detailed" ? { raiseMonth: n(v.raiseMonth ?? "4", "昇給月") } : {}),
     },
     plan: {
       dcMonthlyContributionYen: n(v.dcContribution, "選択制DC掛金"),
@@ -111,7 +114,7 @@ export function parseForm(v: FormValues):
       grossAnnualReturn: n(v.grossReturn, "想定利回り") / 100,
       inflationRate: n(v.inflation, "インフレ率") / 100,
       discountRate: n(v.discount, "割引率") / 100,
-      mode: "simple",
+      mode: v.mode === "detailed" ? "detailed" : "simple",
       valuation: v.valuation === "present-value" ? "present-value" : "nominal",
     },
     regulationVersion: v.regulationVersion,

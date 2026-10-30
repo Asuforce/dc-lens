@@ -1,6 +1,38 @@
 import { expect, test } from "@playwright/test";
 import { fill } from "./helpers.ts";
 
+test("switches detailed mode while keeping inputs local", async ({ page }) => {
+  const requests: string[] = [];
+  page.on("request", (request) => requests.push(`${request.url()} ${request.postData() ?? ""}`));
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto("/");
+  await fill(page);
+  await page.getByRole("button", { name: "比較する" }).click();
+  const simple = await page.locator("#summary .cards").textContent();
+  await page.getByLabel("計算モード").selectOption("detailed");
+  await page.getByLabel("昇給月").selectOption("7");
+  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByText("年次詳細", { exact: true }).click();
+  await expect(
+    page.getByRole("columnheader", { name: "標準報酬月額 厚年 / 健保 (DC → iDeCo)" }),
+  ).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByLabel("計算モード").selectOption("simple");
+  await page.getByRole("button", { name: "比較する" }).click();
+  await expect(
+    page.getByRole("columnheader", { name: "標準報酬月額 厚年 / 健保 (DC → iDeCo)" }),
+  ).toHaveCount(0);
+  expect(await page.locator("#summary .cards").textContent()).toBe(simple);
+  expect(
+    requests.every(
+      (url) =>
+        new URL(url.split(" ")[0] ?? "").origin === new URL(page.url()).origin &&
+        !url.includes("4200000"),
+    ),
+  ).toBe(true);
+  expect(await page.evaluate(() => [localStorage.length, sessionStorage.length])).toEqual([0, 0]);
+});
+
 test("shows optional payout tax without sending or storing inputs", async ({ page }) => {
   const requests: string[] = [];
   page.on("request", (request) => requests.push(request.url()));
