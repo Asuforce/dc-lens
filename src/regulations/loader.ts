@@ -126,12 +126,11 @@ export function resolveRegulationSet(
     }
   }
   if (!picked.has("contribution-limit")) {
-    const detail = limit.ok
-      ? ""
-      : limit.reason === "not-verified"
-        ? `（${limit.detail}）`
-        : limit.reason === "invalid"
-          ? `（${limit.detail}。期間が重複しています）`
+    const detail =
+      !limit.ok && limit.reason === "not-verified"
+        ? "（該当する版は検証前です）"
+        : !limit.ok && limit.reason === "invalid"
+          ? "（該当する版の期間が重複しています）"
           : "";
     warnings.push(`拠出限度額は検証済みのデータがないため、限度額は確認していません${detail}。`);
   }

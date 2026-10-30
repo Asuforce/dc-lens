@@ -31,7 +31,7 @@ it("contribution limit follows the effective date and can be absent", () => {
   expect(after.set.contributionLimit).toBeNull();
   expect(
     after.set.warnings.some(
-      (w) => w.includes("検証済みのデータがない") && w.includes("not verified"),
+      (w) => w.includes("検証済みのデータがない") && w.includes("検証前です"),
     ),
   ).toBe(true);
   expect(absent.set.contributionLimit).toBeNull();
