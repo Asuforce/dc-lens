@@ -1,6 +1,8 @@
 import type {
+  ContributionLimitPayload,
   Dataset,
   DatasetKind,
+  DatasetStatus,
   HealthInsurancePayload,
   IncomeTaxPayload,
   PensionBenefitPayload,
@@ -62,6 +64,11 @@ export interface RegulationSet {
   incomeTax: IncomeTaxPayload;
   residentTax: ResidentTaxPayload;
   pensionBenefit: PensionBenefitPayload;
+  contributionLimit: {
+    payload: ContributionLimitPayload;
+    version: string;
+    status: DatasetStatus;
+  } | null;
   versions: string[];
   warnings: string[];
 }
@@ -97,17 +104,26 @@ export function resolveRegulationSet(
   }
   if (errors.length > 0) return { ok: false, errors };
 
+  const limit = selectDataset(datasets, "contribution-limit", baseDate, "draft");
+  if (limit.ok && limit.dataset.meta.status !== "provisional") {
+    picked.set("contribution-limit", limit.dataset);
+  }
   const get = <P>(kind: DatasetKind): P => (picked.get(kind) as Dataset<P>).payload;
   const warnings: string[] = [
     `制度は基準日 ${baseDate} 時点の内容で固定し、将来の改正は反映していません。`,
   ];
   for (const d of datasets) {
-    if (d.meta.effectiveFrom > baseDate && SET_KINDS.includes(d.meta.kind)) {
+    if (
+      d.meta.effectiveFrom > baseDate &&
+      (SET_KINDS.includes(d.meta.kind) || d.meta.kind === "contribution-limit")
+    ) {
       warnings.push(
         `${d.meta.kind} ${d.meta.version} (${d.meta.effectiveFrom} 施行予定) は反映していません。`,
       );
     }
   }
+  if (!picked.has("contribution-limit"))
+    warnings.push("拠出限度額の制度データがないため、限度額は確認していません。");
   for (const d of picked.values()) {
     if (d.meta.effectiveTo !== null) {
       warnings.push(
@@ -118,6 +134,7 @@ export function resolveRegulationSet(
       warnings.push(`${d.meta.kind} ${d.meta.version} は ${d.meta.status} です。`);
     }
   }
+  const selectedLimit = picked.get("contribution-limit");
   return {
     ok: true,
     set: {
@@ -128,6 +145,13 @@ export function resolveRegulationSet(
       incomeTax: get<IncomeTaxPayload>("income-tax"),
       residentTax: get<ResidentTaxPayload>("resident-tax"),
       pensionBenefit: get<PensionBenefitPayload>("pension-benefit"),
+      contributionLimit: selectedLimit
+        ? {
+            payload: get<ContributionLimitPayload>("contribution-limit"),
+            version: selectedLimit.meta.version,
+            status: selectedLimit.meta.status,
+          }
+        : null,
       versions: [...picked.values()].map((d) => `${d.meta.kind}:${d.meta.version}`),
       warnings,
     },
