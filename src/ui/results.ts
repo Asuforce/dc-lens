@@ -1,3 +1,4 @@
+import type { afterTaxPayout } from "../engine/payout-tax.ts";
 import type { TransferResult } from "../engine/transfer.ts";
 import type { SimulationResult } from "../engine/types.ts";
 import { resultToCsv } from "../lib/csv.ts";
@@ -5,6 +6,31 @@ import type { Dataset } from "../regulations/schema.ts";
 import { chart } from "./charts.ts";
 
 const yen = (n: number) => `${n > 0 ? "+" : ""}${Math.round(n).toLocaleString()}円`;
+export function renderPayout(result: ReturnType<typeof afterTaxPayout>): HTMLElement {
+  const section = document.createElement("section");
+  section.id = "payout-result";
+  section.append(node("h2", "一時金受取時の課税（試算）"));
+  for (const [label, value] of [
+    ["DC", result.dc],
+    ["iDeCo", result.ideco],
+  ] as const) {
+    section.append(node("h3", label));
+    for (const [name, amount] of [
+      ["退職時資産（税引前）", value.afterTaxYen + value.totalTaxYen],
+      ["退職所得控除", value.deductionYen],
+      ["退職所得", value.retirementIncomeYen],
+      ["所得税（復興等込み）", value.incomeTaxYen],
+      ["住民税", value.residentTaxYen],
+      ["手取り（税引後）", value.afterTaxYen],
+    ] as const)
+      section.append(node("p", `${name}: ${yen(amount)}`));
+  }
+  section.append(node("p", `税引後の差（DC − iDeCo）: ${yen(result.afterTaxDifferenceYen)}`));
+  const list = document.createElement("ul");
+  for (const text of [...result.warnings, ...result.assumptions]) list.append(node("li", text));
+  section.append(list);
+  return section;
+}
 function node(tag: string, text: string): HTMLElement {
   const e = document.createElement(tag);
   e.textContent = text;

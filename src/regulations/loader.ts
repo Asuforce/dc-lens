@@ -8,6 +8,7 @@ import type {
   PensionBenefitPayload,
   PensionInsurancePayload,
   ResidentTaxPayload,
+  RetirementIncomePayload,
 } from "./schema.ts";
 import { validateDataset } from "./schema.ts";
 
@@ -63,6 +64,7 @@ export interface RegulationSet {
   health: HealthInsurancePayload;
   incomeTax: IncomeTaxPayload;
   residentTax: ResidentTaxPayload;
+  retirementIncome: RetirementIncomePayload;
   pensionBenefit: PensionBenefitPayload;
   contributionLimit: {
     payload: ContributionLimitPayload;
@@ -81,6 +83,7 @@ const SET_KINDS: readonly DatasetKind[] = [
   "income-tax",
   "resident-tax",
   "pension-benefit",
+  "retirement-income",
 ];
 
 export function resolveRegulationSet(
@@ -144,6 +147,7 @@ export function resolveRegulationSet(
       health: get<HealthInsurancePayload>("health-insurance"),
       incomeTax: get<IncomeTaxPayload>("income-tax"),
       residentTax: get<ResidentTaxPayload>("resident-tax"),
+      retirementIncome: get<RetirementIncomePayload>("retirement-income"),
       pensionBenefit: get<PensionBenefitPayload>("pension-benefit"),
       contributionLimit: selectedLimit
         ? {
