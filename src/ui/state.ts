@@ -23,6 +23,8 @@ export interface FormValues {
   idecoCost: string;
   fixedFee: string;
   transferEnabled?: boolean;
+  payoutEnabled?: boolean;
+  priorServiceYears?: string;
   transferBalance?: string;
   transferFee?: string;
   idleMonths?: string;
@@ -32,10 +34,13 @@ export interface FormValues {
   valuation: string;
   regulationVersion: string;
 }
-export function parseForm(
-  v: FormValues,
-):
-  | { ok: true; input: SimulationInput; transfer?: TransferInput }
+export function parseForm(v: FormValues):
+  | {
+      ok: true;
+      input: SimulationInput;
+      transfer?: TransferInput;
+      payout?: { priorServiceYears: number };
+    }
   | { ok: false; errors: string[] } {
   const errors: string[] = [];
   const n = (value: string, label: string): number => {
@@ -127,7 +132,12 @@ export function parseForm(
       }
     : undefined;
   if (transfer) errors.push(...validateTransferInput(transfer));
+  const payout = v.payoutEnabled
+    ? { priorServiceYears: v.priorServiceYears?.trim() ? Number(v.priorServiceYears) : 0 }
+    : undefined;
+  if (payout && (!Number.isSafeInteger(payout.priorServiceYears) || payout.priorServiceYears < 0))
+    errors.push("すでに拠出した年数は0以上の整数で入力してください。");
   return errors.length
     ? { ok: false, errors }
-    : { ok: true, input, ...(transfer ? { transfer } : {}) };
+    : { ok: true, input, ...(transfer ? { transfer } : {}), ...(payout ? { payout } : {}) };
 }

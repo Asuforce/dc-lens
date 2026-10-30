@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { afterTaxPayout } from "../../src/engine/payout-tax.ts";
 import { SimulationInputError, simulate } from "../../src/engine/simulate.ts";
 import { annualSocialInsurance } from "../../src/engine/social-insurance.ts";
 import type { SimulationInput } from "../../src/engine/types.ts";
@@ -76,6 +77,24 @@ describe("annualSocialInsurance against bundled 2026 data (hand-derived)", () =>
 });
 
 describe("simulate", () => {
+  it("calculates payout from the last working balances without changing the simulation", () => {
+    const input = baseInput({ dcAnnualCostRate: 0.02 });
+    const result = simulate(input, set);
+    const before = structuredClone(result);
+    const row = result.yearlyResults.findLast((year) => year.age < input.profile.retirementAge);
+    expect(row).toBeDefined();
+    if (!row) throw new Error("missing working year");
+    const payout = afterTaxPayout(result, input, 3, set);
+    expect(payout.dc.afterTaxYen + payout.dc.totalTaxYen).toBe(row.dc.investmentBalanceYen);
+    expect(payout.ideco.afterTaxYen + payout.ideco.totalTaxYen).toBe(
+      row.ideco.investmentBalanceYen,
+    );
+    expect(payout.serviceYears).toBe(input.profile.retirementAge - input.profile.age + 3);
+    expect(result).toEqual(before);
+    expect(simulate(input, set)).toEqual(before);
+    expect(() => afterTaxPayout(result, input, -1, set)).toThrow();
+    expect(() => afterTaxPayout(result, input, 1.5, set)).toThrow();
+  });
   it("uses entered rates and validates their range", () => {
     const input = baseInput();
     const original = simulate(input, set);

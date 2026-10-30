@@ -7,7 +7,7 @@ describe("resolveRegulationSet with the bundled datasets", () => {
     const r = resolveRegulationSet(ALL_DATASETS, "2026-10-29", "precise");
     expect(r.ok).toBe(true);
     if (r.ok) {
-      expect(r.set.versions).toHaveLength(6);
+      expect(r.set.versions).toHaveLength(7);
       expect(r.set.warnings.length).toBeGreaterThan(0);
     }
   });

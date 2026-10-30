@@ -232,6 +232,24 @@ export function createForm(prefectures: string[]): HTMLFormElement {
   });
   transfer.append(transferLegend, toggleLabel, transferFields);
   form.append(transfer);
+  const payout = document.createElement("fieldset");
+  const payoutLegend = document.createElement("legend");
+  payoutLegend.textContent = "一時金受取";
+  const payoutLabel = document.createElement("label");
+  const payoutToggle = document.createElement("input");
+  payoutToggle.type = "checkbox";
+  payoutToggle.name = "payoutEnabled";
+  payoutLabel.append(payoutToggle, document.createTextNode("一時金で受け取る場合の課税も試算する"));
+  const yearsLabel = document.createElement("label");
+  yearsLabel.textContent = "すでに拠出した年数（勤続年数に加算）";
+  const years = document.createElement("input");
+  years.type = "number";
+  years.name = "priorServiceYears";
+  years.min = "0";
+  years.step = "1";
+  yearsLabel.append(years);
+  payout.append(payoutLegend, payoutLabel, yearsLabel);
+  form.append(payout);
   const button = document.createElement("button");
   button.type = "submit";
   button.textContent = "比較する";
@@ -265,6 +283,8 @@ export function readForm(form: HTMLFormElement, version: string): FormValues {
     idecoCost: get("idecoCost"),
     fixedFee: get("fixedFee"),
     transferEnabled: data.has("transferEnabled"),
+    payoutEnabled: data.has("payoutEnabled"),
+    priorServiceYears: get("priorServiceYears"),
     transferBalance: get("transferBalance"),
     transferFee: get("transferFee"),
     idleMonths: get("idleMonths"),

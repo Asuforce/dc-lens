@@ -1,9 +1,10 @@
+import { afterTaxPayout } from "./engine/payout-tax.ts";
 import { SimulationInputError, simulate } from "./engine/simulate.ts";
 import { compareTransfer } from "./engine/transfer.ts";
 import { ALL_DATASETS } from "./regulations/all-datasets.ts";
 import { resolveRegulationSet } from "./regulations/loader.ts";
 import { createForm, readForm } from "./ui/form.ts";
-import { renderResults, renderTransfer } from "./ui/results.ts";
+import { renderPayout, renderResults, renderTransfer } from "./ui/results.ts";
 import {
   addScenario,
   removeScenario,
@@ -74,6 +75,10 @@ if (!resolved.ok) {
         ),
       );
       if (parsed.transfer) output.append(renderTransfer(compareTransfer(parsed.transfer)));
+      if (parsed.payout)
+        output.append(
+          renderPayout(afterTaxPayout(result, parsed.input, parsed.payout.priorServiceYears, set)),
+        );
       const label = document.createElement("label");
       label.textContent = "シナリオ名";
       const input = document.createElement("input");
@@ -119,6 +124,10 @@ if (!resolved.ok) {
   form.querySelector('[name="transferEnabled"]')?.addEventListener("change", () => {
     if (!form.querySelector<HTMLInputElement>('[name="transferEnabled"]')?.checked)
       output.querySelector("#transfer-result")?.remove();
+  });
+  form.querySelector('[name="payoutEnabled"]')?.addEventListener("change", () => {
+    if (!form.querySelector<HTMLInputElement>('[name="payoutEnabled"]')?.checked)
+      output.querySelector("#payout-result")?.remove();
   });
   form.querySelector('[name="valuation"]')?.addEventListener("change", () => {
     if (submitted) run();
