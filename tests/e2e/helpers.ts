@@ -14,7 +14,6 @@ export async function fill(page: Page) {
     dcCost: "0.3",
     idecoCost: "0.3",
     fixedFee: "0",
-    initialBalance: "0",
     grossReturn: "3",
     inflation: "1",
     discount: "2",

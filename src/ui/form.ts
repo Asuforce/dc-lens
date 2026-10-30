@@ -14,7 +14,6 @@ const fields: [keyof FormValues, string][] = [
   ["dcCost", "DC年率コスト（%）"],
   ["idecoCost", "iDeCo年率コスト（%）"],
   ["fixedFee", "iDeCo固定費（月額円）"],
-  ["initialBalance", "初期運用資産（円・比較対象外）"],
   ["grossReturn", "信託報酬控除前の想定利回り（%）"],
   ["inflation", "インフレ率（%）"],
   ["discount", "割引率（%）"],
@@ -111,7 +110,7 @@ export function createForm(prefectures: string[]): HTMLFormElement {
     i.type = "number";
     i.step = "any";
     l.append(i);
-    groups[index < 4 ? 0 : index < 8 ? 1 : index < 14 ? 2 : 3]?.append(l);
+    groups[index < 4 ? 0 : index < 8 ? 1 : index < 13 ? 2 : 3]?.append(l);
   }
   grid.append(
     select("prefecture", "都道府県", [
@@ -204,6 +203,35 @@ export function createForm(prefectures: string[]): HTMLFormElement {
   });
   events.append(add);
   form.append(events);
+  const transfer = document.createElement("fieldset");
+  const transferLegend = document.createElement("legend");
+  transferLegend.textContent = "既存資産の移換（新規掛金とは別の判断）";
+  const toggleLabel = document.createElement("label");
+  const toggle = document.createElement("input");
+  toggle.type = "checkbox";
+  toggle.name = "transferEnabled";
+  toggleLabel.append(toggle, document.createTextNode("既存資産の移換も比較する"));
+  const transferFields = document.createElement("div");
+  transferFields.className = "form-grid";
+  transferFields.hidden = true;
+  for (const [name, text] of [
+    ["transferBalance", "移換する既存資産（円）"],
+    ["transferFee", "移換手数料（円）"],
+    ["idleMonths", "移換期間（月）"],
+  ] as const) {
+    const label = document.createElement("label");
+    label.textContent = text;
+    const input = document.createElement("input");
+    input.type = "number";
+    input.name = name;
+    label.append(input);
+    transferFields.append(label);
+  }
+  toggle.addEventListener("change", () => {
+    transferFields.hidden = !toggle.checked;
+  });
+  transfer.append(transferLegend, toggleLabel, transferFields);
+  form.append(transfer);
   const button = document.createElement("button");
   button.type = "submit";
   button.textContent = "比較する";
@@ -236,7 +264,10 @@ export function readForm(form: HTMLFormElement, version: string): FormValues {
     dcCost: get("dcCost"),
     idecoCost: get("idecoCost"),
     fixedFee: get("fixedFee"),
-    initialBalance: get("initialBalance"),
+    transferEnabled: data.has("transferEnabled"),
+    transferBalance: get("transferBalance"),
+    transferFee: get("transferFee"),
+    idleMonths: get("idleMonths"),
     grossReturn: get("grossReturn"),
     inflation: get("inflation"),
     discount: get("discount"),
