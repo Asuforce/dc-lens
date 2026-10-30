@@ -127,6 +127,7 @@ export function renderResults(
   details.append(node("summary", "年次詳細"));
   const table = document.createElement("table");
   const header = table.insertRow();
+  const hasMonthly = result.yearlyResults.some((r) => r.dc.monthlyStandardRemuneration);
   for (const h of [
     "年",
     "年齢",
@@ -134,6 +135,7 @@ export function renderResults(
     "手取り差",
     "税 DC / iDeCo",
     "社保 DC / iDeCo",
+    ...(hasMonthly ? ["標準報酬月額 厚年 / 健保 (DC → iDeCo)"] : []),
     "手数料 DC / iDeCo",
     "資産差",
     "出典 versions",
@@ -154,6 +156,9 @@ export function renderResults(
       yen(r.annualCashFlowDifferenceYen),
       `${yen(d.incomeTaxYen + d.residentTaxYen)} / ${yen(i.incomeTaxYen + i.residentTaxYen)}`,
       `${yen(d.socialInsuranceYen)} / ${yen(i.socialInsuranceYen)}`,
+      ...(hasMonthly
+        ? [formatStandards(r.dc.monthlyStandardRemuneration, r.ideco.monthlyStandardRemuneration)]
+        : []),
       `${yen(d.fixedFeeYen + d.trustFeeYen)} / ${yen(i.fixedFeeYen + i.trustFeeYen)}`,
       yen(r.investmentBalanceDifferenceYen),
       r.dc.sources.join(" / "),
@@ -188,4 +193,13 @@ export function renderResults(
   for (const w of result.warnings) warnings.append(node("li", w));
   root.append(warnings);
   return root;
+}
+function formatStandards(
+  dc: { pension: number[]; health: number[] } | undefined,
+  ideco: { pension: number[]; health: number[] } | undefined,
+): string {
+  if (!dc || !ideco) return "—";
+  const range = (values: number[]) =>
+    `${(values[0] ?? 0).toLocaleString()}→${(values.at(-1) ?? 0).toLocaleString()}`;
+  return `厚年 ${range(dc.pension)} / ${range(ideco.pension)}、健保 ${range(dc.health)} / ${range(ideco.health)}`;
 }

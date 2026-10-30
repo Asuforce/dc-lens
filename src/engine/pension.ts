@@ -6,7 +6,19 @@ export function annualAccrualYen(
   standardMonthlyYen: Yen,
   standardBonusYen: Yen,
 ): Yen {
-  const total = 12 * standardMonthlyYen + standardBonusYen;
+  return annualAccrualFromMonthlyYen(
+    payload,
+    Array<Yen>(12).fill(standardMonthlyYen),
+    standardBonusYen,
+  );
+}
+
+export function annualAccrualFromMonthlyYen(
+  payload: PensionBenefitPayload,
+  standardMonthlyYenList: number[],
+  standardBonusYen: number,
+): Yen {
+  const total = standardMonthlyYenList.reduce((sum, value) => sum + value, 0) + standardBonusYen;
   const multiplierThousandths = Math.round(payload.multiplierPerMille * 1000);
   return Math.round((total * multiplierThousandths) / 1_000_000);
 }
