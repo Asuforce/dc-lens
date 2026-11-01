@@ -50,18 +50,51 @@ export function annualSocialInsurance(
   set: Pick<RegulationSet, "pension" | "health">,
   input: SocialInsuranceInput,
 ): SocialInsuranceResult {
+  const pg = findGrade(set.pension, input.monthlyRemunerationYen);
+  const hg = findGrade(set.health, input.monthlyRemunerationYen);
+  return annualSocialInsuranceMonthly(set, {
+    prefecture: input.prefecture,
+    age: input.age,
+    pensionStandardMonthlyYen: Array<number>(12).fill(pg.standardMonthlyYen),
+    healthStandardMonthlyYen: Array<number>(12).fill(hg.standardMonthlyYen),
+    bonusPaymentsYen: input.bonusPaymentsYen,
+  });
+}
+
+export function annualSocialInsuranceMonthly(
+  set: Pick<RegulationSet, "pension" | "health">,
+  input: {
+    prefecture: string;
+    age: number;
+    pensionStandardMonthlyYen: number[];
+    healthStandardMonthlyYen: number[];
+    bonusPaymentsYen: number[];
+  },
+): SocialInsuranceResult {
+  if (input.pensionStandardMonthlyYen.length !== 12 || input.healthStandardMonthlyYen.length !== 12)
+    throw new RangeError("Expected 12 monthly standards");
   const { pension, health } = set;
   const rate = Object.hasOwn(health.healthTotalRatePercentByPrefecture, input.prefecture)
     ? health.healthTotalRatePercentByPrefecture[input.prefecture]
     : undefined;
   if (rate === undefined) throw new Error(`Unknown prefecture: ${input.prefecture}`);
-  const pg = findGrade(pension, input.monthlyRemunerationYen);
-  const hg = findGrade(health, input.monthlyRemunerationYen);
+  const pensionLastYen = input.pensionStandardMonthlyYen.at(-1);
+  const healthLastYen = input.healthStandardMonthlyYen.at(-1);
+  if (pensionLastYen === undefined || healthLastYen === undefined)
+    throw new RangeError("Expected 12 monthly standards");
+  const pg = findGrade(pension, pensionLastYen);
+  const hg = findGrade(health, healthLastYen);
   const careApplied = input.age >= 40 && input.age < 65;
   const healthRate =
     rate + health.childSupportTotalRatePercent + (careApplied ? health.careTotalRatePercent : 0);
-  let pensionEmployeeYen = 12 * halfPremiumYen(pg.standardMonthlyYen, pension.totalRatePercent);
-  let healthEmployeeYen = 12 * halfPremiumYen(hg.standardMonthlyYen, healthRate);
+  let pensionEmployeeYen = input.pensionStandardMonthlyYen.reduce(
+    (sum, value) => sum + halfPremiumYen(value, pension.totalRatePercent),
+    0,
+  );
+  let healthEmployeeYen = input.healthStandardMonthlyYen.reduce(
+    (sum, value) => sum + halfPremiumYen(value, healthRate),
+    0,
+  );
   let pensionStandardBonusYen = 0;
   let healthStandardBonusYen = 0;
   const warnings: string[] = [];
@@ -82,10 +115,10 @@ export function annualSocialInsurance(
   }
   return {
     pensionGrade: pg.grade,
-    pensionStandardMonthlyYen: pg.standardMonthlyYen,
+    pensionStandardMonthlyYen: pensionLastYen,
     pensionStandardBonusYen,
     healthGrade: hg.grade,
-    healthStandardMonthlyYen: hg.standardMonthlyYen,
+    healthStandardMonthlyYen: healthLastYen,
     healthStandardBonusYen,
     careApplied,
     pensionEmployeeYen,

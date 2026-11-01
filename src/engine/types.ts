@@ -33,6 +33,7 @@ export interface SalaryProfile {
   events: SalaryEvent[];
   bonusMode: BonusMode;
   monthlySalaryIsEstimated: boolean;
+  raiseMonth?: number;
 }
 
 export interface PensionPlan {
@@ -74,6 +75,7 @@ export interface ScenarioYearResult {
   investmentBalanceYen: Yen;
   breakdown: CostBreakdown;
   sources: string[];
+  monthlyStandardRemuneration?: { pension: number[]; health: number[] };
 }
 
 export interface YearlyResult {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  annualAccrualFromMonthlyYen,
   annualAccrualYen,
   annualBenefitYen,
   benefitYears,
@@ -9,6 +10,11 @@ import {
 const payload = { multiplierPerMille: 5.481 };
 
 describe("annualAccrualYen", () => {
+  it("matches monthly accrual for twelve equal standards", () => {
+    expect(annualAccrualFromMonthlyYen(payload, Array<number>(12).fill(200_000), 600_000)).toBe(
+      annualAccrualYen(payload, 200_000, 600_000),
+    );
+  });
   it("is zero when the standard remuneration is zero", () => {
     expect(annualAccrualYen(payload, 0, 0)).toBe(0);
   });

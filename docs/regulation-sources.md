@@ -9,6 +9,17 @@
 - `pnpm verify:regulations` が、メタデータの欠落、非HTTPSのURL、等級表の隙間などを検査する。
 - 再配布権限と第三者の著作権は、データを追加するときに確認して下記に記録する。
 
+## 月次等級の規則の出典
+
+以下はデータセットではなく計算規則の出典。確認日はいずれも2026-10-30。
+
+- [定時決定（日本年金機構）](https://www.nenkin.go.jp/service/kounen/hokenryo/hoshu/20121017.html)
+- [随時改定（日本年金機構）](https://www.nenkin.go.jp/service/kounen/hokenryo/hoshu/20150515-02.html)
+
+```text
+定時決定・随時改定の規則 → 月次等級系列 → 年間保険料
+```
+
 ## 登録済みデータ
 
 既存データの検証日は 2026-10-29。数値は `src/regulations/data/` の JSON が正で、出典URLは各 `meta.sourceUrl` と `meta.note` にある。

@@ -12,6 +12,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
       expect((await scan()).violations).toEqual([]);
       await fill(page);
+      await page.getByLabel("計算モード").selectOption("detailed");
       await page.getByLabel("一時金で受け取る場合の課税も試算する").check();
       await page.getByRole("button", { name: "比較する" }).click();
       await expect(page.locator("#summary")).toBeVisible();

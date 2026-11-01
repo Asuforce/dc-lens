@@ -26,6 +26,16 @@ const values: FormValues = {
   regulationVersion: "test",
 };
 describe("form parsing", () => {
+  it("parses calculation mode and raise month", () => {
+    const detailed = parseForm({ ...values, mode: "detailed", raiseMonth: "7" });
+    expect(detailed.ok).toBe(true);
+    if (detailed.ok) {
+      expect(detailed.input.assumptions.mode).toBe("detailed");
+      expect(detailed.input.salary.raiseMonth).toBe(7);
+    }
+    const simple = parseForm({ ...values, mode: "simple" });
+    if (simple.ok) expect(simple.input.salary.raiseMonth).toBeUndefined();
+  });
   it("parses custom health rates and requires all fields", () => {
     const custom = {
       ...values,

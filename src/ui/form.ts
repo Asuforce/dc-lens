@@ -128,7 +128,7 @@ export function createForm(prefectures: string[]): HTMLFormElement {
     ]),
     select("mode", "計算モード", [
       ["simple", "簡易"],
-      ["detailed", "詳細（フェーズ6）", true],
+      ["detailed", "詳細"],
     ]),
     select("valuation", "評価基準", [
       ["nominal", "名目"],
@@ -141,6 +141,28 @@ export function createForm(prefectures: string[]): HTMLFormElement {
       label,
     );
   }
+  const raiseMonth = select(
+    "raiseMonth",
+    "昇給月",
+    Array.from({ length: 12 }, (_, i) => [String(i + 1), `${i + 1}月`]),
+  );
+  const raiseSelect = raiseMonth.querySelector("select");
+  if (raiseSelect) {
+    raiseSelect.value = "4";
+    raiseSelect.setAttribute("aria-describedby", "raise-month-help");
+  }
+  const raiseHelp = document.createElement("p");
+  raiseHelp.id = "raise-month-help";
+  raiseHelp.textContent = "2年目以降、毎年この月から昇給を反映します。";
+  const raiseFields = document.createElement("div");
+  raiseFields.append(raiseMonth, raiseHelp);
+  groups[4]?.append(raiseFields);
+  const mode = form.querySelector<HTMLSelectElement>('[name="mode"]');
+  const updateMode = () => {
+    raiseFields.hidden = mode?.value !== "detailed";
+  };
+  mode?.addEventListener("change", updateMode);
+  updateMode();
   const customRates = document.createElement("div");
   customRates.className = "form-grid";
   const help = document.createElement("p");
@@ -272,6 +294,8 @@ export function readForm(form: HTMLFormElement, version: string): FormValues {
     raiseRate: get("raiseRate"),
     events: ages.map((age, i) => ({ age: String(age), rate: String(rates[i] ?? "") })),
     bonusMode: get("bonusMode"),
+    mode: get("mode"),
+    raiseMonth: get("raiseMonth"),
     prefecture: get("prefecture"),
     insurer: get("insurer"),
     healthTotalRatePercent: get("healthTotalRatePercent"),
