@@ -194,3 +194,30 @@ test("keyboard navigation submits and opens details", async ({ page }) => {
   await page.keyboard.press("Tab");
   await expect(page.getByText("現在の内訳", { exact: true })).toBeFocused();
 });
+
+test("downloads CSV without sending or storing inputs", async ({ page }) => {
+  const requests: { url: string; method: string }[] = [];
+  page.on("request", (request) => requests.push({ url: request.url(), method: request.method() }));
+  await page.goto("/");
+  await fill(page);
+  await page.getByRole("button", { name: "比較する" }).click();
+  const count =
+    (await page.getByText("年次詳細", { exact: true }).locator("..").locator("table tr").count()) -
+    1;
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: "CSVをダウンロード" }).click(),
+  ]);
+  expect(download.suggestedFilename()).toBe("dc-lens-result.csv");
+  const stream = await download.createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+  const csv = Buffer.concat(chunks).toString("utf8");
+  expect(csv.startsWith("\uFEFF年,年齢,入力報酬,手取り差")).toBe(true);
+  expect(csv.split("\r\n")).toHaveLength(count + 2);
+  for (const request of requests) {
+    expect(new URL(request.url).origin).toBe(new URL(page.url()).origin);
+    expect(request.method).toBe("GET");
+  }
+  expect(await page.evaluate(() => [localStorage.length, sessionStorage.length])).toEqual([0, 0]);
+});

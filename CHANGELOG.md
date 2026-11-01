@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- 年次結果のCSVダウンロードを追加。
 - Vite + Vanilla TypeScript の基盤、Cloudflare Workers Static Assets の設定、CI を追加。
 - 制度データのスキーマと検査スクリプトを追加。
 - 2026年度の制度データ(厚生年金、協会けんぽ、所得税、住民税、年金給付乗率)を一次資料から追加。
