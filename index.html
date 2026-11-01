@@ -1,4 +1,74 @@
 <!doctype html>
 <html lang="ja">
-<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>DC Lens | 選択制DCとiDeCoの比較</title><meta name="description" content="ブラウザ内で完結する選択制DCとiDeCoの比較シミュレータ" /><link rel="stylesheet" href="/src/styles.css" /></head>
-<body><a class="skip" href="#main">本文へ移動</a><header><div class="container"><h1>DC Lens</h1><p>選択制DCとiDeCoの比較シミュレータ</p></div></header><main id="main" class="container"><p class="privacy">入力内容は送信・保存されません。計算はブラウザ内で完結します。</p><p>比較は判断の補助です。加入資格や勤務先の規程は別途ご確認ください。</p><section><h2>条件を入力</h2><p>すべての金額は円単位です。月給を省略すると年収と賞与から推定します。</p><div id="errors" role="alert" aria-live="polite"></div><div id="form-container"></div></section><div id="output"></div><section class="information"><h2>この試算について</h2><section id="method"><h3>計算方法</h3><p>簡易モードでは社会保険の等級に拠出差が即時反映されると仮定します。生涯差には退職時資産差を一度だけ加算します。</p></section><section id="sources"><h3>制度データ出典</h3><p>計算結果の「計算根拠」から各制度の一次資料と検証日を確認できます。</p></section><section id="faq"><h3>FAQ・未対応項目</h3><p>加入資格、拠出上限、既存資産の移換、受取時課税、詳細な随時改定は未対応です。初期運用資産とインフレ率は比較に含まれません。</p></section><section id="privacy"><h3>プライバシー</h3><p>入力値を送信、保存、URLへの埋め込み、ログ記録しません。</p></section><section id="disclaimer"><h3>免責事項</h3><p>個別の金融・税務・年金の助言ではありません。利回りは仮定であり将来を保証しません。資産額は税引前評価額です。</p></section><section id="contact"><h3>問い合わせ・問題報告</h3><p><a href="https://github.com/Asuforce/dc-lens/issues">GitHub Issues</a>へお寄せください。個人情報は記載しないでください。</p></section></section></main><footer class="container"><small>版 <span id="build-version"></span> / コミット <span id="build-sha"></span></small></footer><script type="module" src="/src/main.ts"></script></body></html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DC Lens | 選択制DCとiDeCoの比較</title>
+<meta name="description" content="選択制企業型DCとiDeCoを同じ条件で比較する、ブラウザ内で完結する無料の試算ツール。入力値は送信・保存されません。" />
+<meta property="og:title" content="DC Lens" />
+<meta property="og:description" content="選択制企業型DCとiDeCoの比較シミュレータ。計算はすべてブラウザ内で行います。" />
+<meta property="og:type" content="website" />
+<meta name="theme-color" content="#ffffff" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2212%22 fill=%22%231c4d49%22/%3E%3Ctext x=%2232%22 y=%2244%22 text-anchor=%22middle%22 font-size=%2232%22 fill=%22white%22%3ED%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body>
+<a class="skip" href="#main">本文へ移動</a>
+<header>
+<div class="container">
+<h1>DC Lens</h1>
+<p>選択制DCとiDeCoの比較シミュレータ</p>
+</div>
+</header>
+<main id="main" class="container">
+<p class="privacy">入力内容は送信・保存されません。計算はブラウザ内で完結します。</p>
+<p>比較は判断の補助です。加入資格や勤務先の規程は別途ご確認ください。</p>
+<section>
+<h2>条件を入力</h2>
+<p>すべての金額は円単位です。月給を省略すると年収と賞与から推定します。</p>
+<div id="errors" role="status" aria-live="polite" tabindex="-1">
+</div>
+<div id="form-container">
+</div>
+</section>
+<div id="output">
+</div>
+<section class="information">
+<h2>この試算について</h2>
+<section id="method">
+<h3>計算方法</h3>
+<p>簡易モードでは社会保険の等級に拠出差が即時反映されると仮定します。生涯差には退職時資産差を一度だけ加算します。</p>
+</section>
+<section id="sources">
+<h3>制度データ出典</h3>
+<p>計算結果の「計算根拠」から各制度の一次資料と検証日を確認できます。</p>
+</section>
+<section id="faq">
+<h3>FAQ・未対応項目</h3>
+<p>加入資格、拠出上限、既存資産の移換、受取時課税、詳細な随時改定は未対応です。初期運用資産とインフレ率は比較に含まれません。</p>
+</section>
+<section id="privacy">
+<h3>プライバシー</h3>
+<p>入力値を送信、保存、URLへの埋め込み、ログ記録しません。</p>
+</section>
+<section id="disclaimer">
+<h3>免責事項</h3>
+<p>個別の金融・税務・年金の助言ではありません。利回りは仮定であり将来を保証しません。資産額は税引前評価額です。</p>
+</section>
+<section id="contact">
+<h3>問い合わせ・問題報告</h3>
+<p>
+<a href="https://github.com/Asuforce/dc-lens/issues">GitHub Issues</a>へお寄せください。個人情報は記載しないでください。</p>
+</section>
+</section>
+</main>
+<footer class="container">
+<small>版 <span id="build-version">
+</span> / コミット <span id="build-sha">
+</span>
+</small>
+</footer>
+<script type="module" src="/src/main.ts">
+</script>
+</body>
+</html>

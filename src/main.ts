@@ -33,6 +33,7 @@ if (!resolved.ok) {
     const parsed = parseForm(readForm(form, set.versions.join(" / ")));
     if (!parsed.ok) {
       errors.textContent = parsed.errors.join(" / ");
+      errors.focus();
       return;
     }
     try {
@@ -47,8 +48,10 @@ if (!resolved.ok) {
       );
       submitted = true;
     } catch (e) {
-      if (e instanceof SimulationInputError) errors.textContent = e.errors.join(" / ");
-      else throw e;
+      if (e instanceof SimulationInputError) {
+        errors.textContent = e.errors.join(" / ");
+        errors.focus();
+      } else throw e;
     }
   };
   form.addEventListener("submit", (e) => {

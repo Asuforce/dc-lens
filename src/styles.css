@@ -112,6 +112,7 @@ details {
 summary {
   cursor: pointer;
   font-weight: 700;
+  min-height: 24px;
 }
 table {
   border-collapse: collapse;
@@ -124,11 +125,15 @@ td {
   border: 1px solid #9caeaa;
   white-space: nowrap;
 }
+.chart-scroll {
+  overflow-x: auto;
+}
 svg {
   display: block;
+  min-width: 560px;
   width: 100%;
   max-width: 800px;
-  overflow: visible;
+  overflow: hidden;
 }
 svg text {
   font-size: 11px;

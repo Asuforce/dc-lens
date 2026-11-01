@@ -55,7 +55,13 @@ export function chart(rows: YearlyResult[], kind: "cash" | "assets"): HTMLElemen
     t.textContent = `${rows[i]?.age ?? ""}歳`;
     svg.append(t);
   }
-  wrap.append(svg);
+  const scroll = document.createElement("div");
+  scroll.className = "chart-scroll";
+  scroll.tabIndex = 0;
+  scroll.setAttribute("role", "group");
+  scroll.setAttribute("aria-label", `${heading.textContent}（横にスクロールできます）`);
+  scroll.append(svg);
+  wrap.append(scroll);
   if (kind === "assets") {
     const legend = document.createElement("p");
     legend.textContent = "実線：選択制DC / 破線：iDeCo";
@@ -71,6 +77,7 @@ export function chart(rows: YearlyResult[], kind: "cash" | "assets"): HTMLElemen
     ? ["年齢", "年間差（円）"]
     : ["年齢", "選択制DC（円）", "iDeCo（円）"]) {
     const th = document.createElement("th");
+    th.scope = "col";
     th.textContent = label;
     header.append(th);
   }
