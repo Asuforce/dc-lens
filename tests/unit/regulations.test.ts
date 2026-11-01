@@ -111,3 +111,39 @@ describe("contribution limits", () => {
     ).toBe(false);
   });
 });
+
+describe("retirement income dataset", () => {
+  const m = { ...meta, kind: "retirement-income" };
+  const payload = {
+    deductionPerYearUpTo20Yen: 400000,
+    deductionPerYearOver20Yen: 700000,
+    deductionMinimumYen: 800000,
+    deductionBaseAt20YearsYen: 8000000,
+    taxableFractionDenominator: 2,
+    residentPrefecturalPercent: 4,
+    residentMunicipalPercent: 6,
+  };
+  it("validates required values and rejects invalid amounts and rates", () => {
+    expect(validateDataset({ meta: m, payload }).ok).toBe(true);
+    expect(
+      validateDataset({ meta: m, payload: { ...payload, taxableFractionDenominator: 0 } }).ok,
+    ).toBe(false);
+    expect(
+      validateDataset({ meta: m, payload: { ...payload, residentMunicipalPercent: 101 } }).ok,
+    ).toBe(false);
+    expect(validateDataset({ meta: m, payload: { ...payload, deductionMinimumYen: -1 } }).ok).toBe(
+      false,
+    );
+    expect(validateDataset({ meta: m, payload: {} }).ok).toBe(false);
+  });
+  it("selects verified data only within its effective period", () => {
+    const datasets = parseDatasets([{ meta: { ...m, effectiveTo: "2030-12-31" }, payload }]);
+    expect(selectDataset(datasets, "retirement-income", "2030-01-01", "precise").ok).toBe(true);
+    expect(selectDataset(datasets, "retirement-income", "2031-01-01", "precise").ok).toBe(false);
+    const provisional = parseDatasets([
+      { meta: { ...m, status: "provisional", verifiedAt: null }, payload },
+    ]);
+    expect(selectDataset(provisional, "retirement-income", "2030-06-01", "precise").ok).toBe(false);
+    expect(selectDataset(provisional, "retirement-income", "2030-06-01", "draft").ok).toBe(true);
+  });
+});

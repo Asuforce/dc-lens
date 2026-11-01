@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "version": "2026-10",
+    "kind": "retirement-income",
+    "effectiveFrom": "2026-01-01",
+    "effectiveTo": null,
+    "status": "verified",
+    "verifiedAt": "2026-10-30",
+    "sourceName": "国税庁 タックスアンサー No.1420・No.2732、所得税法30条、地方税法50条の4・328条の3、総務省",
+    "sourceUrl": "https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1420.htm",
+    "note": "「20年以下 | 40万円 × A (80万円に満たない場合には、80万円)」「20年超 | 800万円 ＋ 70万円 × (A - 20年)」「（収入金額（源泉徴収される前の金額） － 退職所得控除額） × 1 ／ 2 ＝ 退職所得の金額」。地方税法50条の4「分離課税に係る所得割の税率は、百分の四とする」、328条の3「…百分の六とする」。短期退職手当等、特定役員退職手当等、障害者加算、過去の退職手当との重複控除、他の退職金との合算、他所得との選択、年金受取、2048年以降の税率変更は対象外。2026-10-01版を確認し、2027-01-01版と2030年版で該当条文に変更なし。以降の有効期限なしは仮定。"
+  },
+  "payload": {
+    "deductionPerYearUpTo20Yen": 400000,
+    "deductionPerYearOver20Yen": 700000,
+    "deductionMinimumYen": 800000,
+    "deductionBaseAt20YearsYen": 8000000,
+    "taxableFractionDenominator": 2,
+    "residentPrefecturalPercent": 4,
+    "residentMunicipalPercent": 6
+  }
+}

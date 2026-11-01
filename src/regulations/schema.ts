@@ -8,6 +8,7 @@ export const DATASET_KINDS = [
   "resident-tax",
   "pension-benefit",
   "contribution-limit",
+  "retirement-income",
 ] as const;
 export type DatasetKind = (typeof DATASET_KINDS)[number];
 
@@ -89,6 +90,34 @@ export interface ContributionLimitPayload {
 
 export interface PensionBenefitPayload {
   multiplierPerMille: number;
+}
+
+export interface RetirementIncomePayload {
+  deductionPerYearUpTo20Yen: number;
+  deductionPerYearOver20Yen: number;
+  deductionMinimumYen: number;
+  deductionBaseAt20YearsYen: number;
+  taxableFractionDenominator: number;
+  residentPrefecturalPercent: number;
+  residentMunicipalPercent: number;
+}
+
+export function validateRetirementIncome(raw: unknown): ValidationResult<RetirementIncomePayload> {
+  if (!isRecord(raw)) return { ok: false, errors: ["payload must be an object"] };
+  const errors: string[] = [];
+  for (const key of [
+    "deductionPerYearUpTo20Yen",
+    "deductionPerYearOver20Yen",
+    "deductionMinimumYen",
+    "deductionBaseAt20YearsYen",
+    "taxableFractionDenominator",
+  ]) {
+    if (!isNonNegInt(raw[key]) || raw[key] === 0) errors.push(`${key} must be a positive integer`);
+  }
+  for (const key of ["residentPrefecturalPercent", "residentMunicipalPercent"]) {
+    if (!isRate(raw[key])) errors.push(`${key} must be a rate`);
+  }
+  return finish(errors, raw);
 }
 
 export interface Dataset<P = unknown> {
@@ -366,6 +395,7 @@ const PAYLOAD_VALIDATORS: Record<DatasetKind, (raw: unknown) => ValidationResult
   "resident-tax": validateResidentTax,
   "pension-benefit": validatePensionBenefit,
   "contribution-limit": validateContributionLimit,
+  "retirement-income": validateRetirementIncome,
 };
 
 export function validateDataset(raw: unknown): ValidationResult<Dataset> {

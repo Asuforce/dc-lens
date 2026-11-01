@@ -1,6 +1,28 @@
 import { expect, test } from "@playwright/test";
 import { fill } from "./helpers.ts";
 
+test("shows optional payout tax without sending or storing inputs", async ({ page }) => {
+  const requests: string[] = [];
+  page.on("request", (request) => requests.push(request.url()));
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto("/");
+  const origin = new URL(page.url()).origin;
+  await fill(page);
+  const toggle = page.getByLabel("一時金で受け取る場合の課税も試算する");
+  await toggle.check();
+  await page.getByLabel("すでに拠出した年数（勤続年数に加算）").fill("3");
+  await page.getByRole("button", { name: "比較する" }).click();
+  const payout = page.locator("#payout-result");
+  await expect(payout.getByRole("heading", { name: "一時金受取時の課税（試算）" })).toBeVisible();
+  await expect(payout.getByText(/短期退職手当等、特定役員退職手当等.*対象外/)).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await toggle.uncheck();
+  await page.getByRole("button", { name: "比較する" }).click();
+  await expect(payout).toHaveCount(0);
+  expect(requests.every((url) => new URL(url).origin === origin)).toBe(true);
+  expect(await page.evaluate(() => [localStorage.length, sessionStorage.length])).toEqual([0, 0]);
+});
+
 test("compares transfer separately without sending or storing inputs", async ({
   page,
   baseURL,
