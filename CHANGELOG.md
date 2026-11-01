@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- シナリオを最大4件まで比較する機能を追加。
 - 年次結果のCSVダウンロードを追加。
 - Vite + Vanilla TypeScript の基盤、Cloudflare Workers Static Assets の設定、CI を追加。
 - 制度データのスキーマと検査スクリプトを追加。

@@ -3,6 +3,12 @@ import { ALL_DATASETS } from "./regulations/all-datasets.ts";
 import { resolveRegulationSet } from "./regulations/loader.ts";
 import { createForm, readForm } from "./ui/form.ts";
 import { renderResults } from "./ui/results.ts";
+import {
+  addScenario,
+  removeScenario,
+  renderScenarioTable,
+  type ScenarioEntry,
+} from "./ui/scenarios.ts";
 import { parseForm } from "./ui/state.ts";
 
 function element(id: string): HTMLElement {
@@ -25,6 +31,26 @@ if (!resolved.ok) {
   const set = resolved.set;
   const form = createForm(Object.keys(set.health.healthTotalRatePercentByPrefecture));
   element("form-container").append(form);
+  let scenarios: ScenarioEntry[] = [];
+  let nextId = 1;
+  const comparison = document.createElement("section");
+  const heading = document.createElement("h2");
+  heading.textContent = "シナリオ比較";
+  const status = document.createElement("p");
+  status.setAttribute("aria-live", "polite");
+  const tableContainer = document.createElement("div");
+  comparison.append(heading, status, tableContainer);
+  output.after(comparison);
+  const renderComparison = () => {
+    tableContainer.replaceChildren(
+      renderScenarioTable(scenarios, (id) => {
+        scenarios = removeScenario(scenarios, id);
+        status.textContent = "シナリオを削除しました。";
+        renderComparison();
+      }),
+    );
+  };
+  renderComparison();
   let submitted = false;
   const run = () => {
     submitted = false;
@@ -46,6 +72,36 @@ if (!resolved.ok) {
           parsed.input.assumptions.valuation,
         ),
       );
+      const label = document.createElement("label");
+      label.textContent = "シナリオ名";
+      const input = document.createElement("input");
+      input.maxLength = 40;
+      label.append(input);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = "このシナリオを比較に追加";
+      button.addEventListener("click", () => {
+        if (scenarios.length >= 4) {
+          status.textContent = "比較できるシナリオは4件までです。";
+          return;
+        }
+        scenarios = addScenario(scenarios, {
+          id: nextId++,
+          label: input.value,
+          valuation: parsed.input.assumptions.valuation,
+          regulationVersion: result.regulationVersion,
+          summary: result.summary,
+          contributions: {
+            dcMonthlyYen: parsed.input.plan.dcMonthlyContributionYen,
+            idecoMonthlyYen: parsed.input.plan.idecoMonthlyContributionYen,
+          },
+          grossAnnualReturn: parsed.input.assumptions.grossAnnualReturn,
+        });
+        status.textContent = "シナリオを追加しました。";
+        renderComparison();
+      });
+      const download = output.querySelector("button");
+      download?.after(label, button);
       submitted = true;
     } catch (e) {
       if (e instanceof SimulationInputError) {

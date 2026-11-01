@@ -221,3 +221,30 @@ test("downloads CSV without sending or storing inputs", async ({ page }) => {
   }
   expect(await page.evaluate(() => [localStorage.length, sessionStorage.length])).toEqual([0, 0]);
 });
+
+test("compares session scenarios without persistence or requests", async ({ page }) => {
+  const requests: { url: string; method: string }[] = [];
+  page.on("request", (r) => requests.push({ url: r.url(), method: r.method() }));
+  await page.goto("/");
+  const initialUrl = page.url();
+  await fill(page);
+  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "このシナリオを比較に追加" }).click();
+  await page.locator('[name="dcContribution"]').fill("10000");
+  await page.getByRole("button", { name: "比較する" }).click();
+  const add = page.getByRole("button", { name: "このシナリオを比較に追加" });
+  await add.click();
+  await expect(page.getByRole("button", { name: /シナリオ .*を削除/ })).toHaveCount(2);
+  await page.getByRole("button", { name: "シナリオ 1を削除" }).click();
+  await expect(page.getByRole("button", { name: /シナリオ .*を削除/ })).toHaveCount(1);
+  for (let i = 0; i < 4; i++) await add.click();
+  await expect(page.getByText("比較できるシナリオは4件までです。")).toBeVisible();
+  expect(
+    await page.evaluate(() => [localStorage.length, sessionStorage.length, document.cookie]),
+  ).toEqual([0, 0, ""]);
+  expect(page.url()).toBe(initialUrl);
+  for (const request of requests) {
+    expect(new URL(request.url).origin).toBe(new URL(initialUrl).origin);
+    expect(request.method).toBe("GET");
+  }
+});
