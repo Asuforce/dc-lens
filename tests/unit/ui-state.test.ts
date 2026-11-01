@@ -27,6 +27,20 @@ const values: FormValues = {
   regulationVersion: "test",
 };
 describe("form parsing", () => {
+  it("parses custom health rates and requires all fields", () => {
+    const custom = {
+      ...values,
+      insurer: "kenpo-kumiai",
+      prefecture: "",
+      healthTotalRatePercent: "9",
+      careTotalRatePercent: "1.6",
+      childSupportTotalRatePercent: "0.2",
+    };
+    const result = parseForm(custom);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.input.profile.customHealthRates?.careTotalRatePercent).toBe(1.6);
+    expect(parseForm({ ...custom, careTotalRatePercent: "" }).ok).toBe(false);
+  });
   it("converts percentages and estimates monthly salary", () => {
     const r = parseForm({ ...values, monthlySalary: "" });
     expect(r.ok).toBe(true);

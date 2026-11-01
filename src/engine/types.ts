@@ -2,6 +2,12 @@ export type Yen = number;
 
 export type HealthInsurerKind = "kyokai-kenpo" | "kenpo-kumiai" | "custom";
 
+export interface CustomHealthRates {
+  healthTotalRatePercent: number;
+  careTotalRatePercent: number;
+  childSupportTotalRatePercent: number;
+}
+
 export interface UserProfile {
   age: number;
   retirementAge: number;
@@ -9,6 +15,7 @@ export interface UserProfile {
   pensionEndAge: number;
   prefecture: string;
   insurer: HealthInsurerKind;
+  customHealthRates?: CustomHealthRates;
 }
 
 export interface SalaryEvent {

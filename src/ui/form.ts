@@ -120,8 +120,8 @@ export function createForm(prefectures: string[]): HTMLFormElement {
     ]),
     select("insurer", "健康保険者", [
       ["kyokai-kenpo", "協会けんぽ"],
-      ["other", "健保組合（未対応）", true],
-      ["custom", "カスタム（未対応）", true],
+      ["kenpo-kumiai", "健保組合"],
+      ["custom", "カスタム料率"],
     ]),
     select("bonusMode", "賞与モード", [
       ["fixed-ratio", "賞与比率固定"],
@@ -142,6 +142,36 @@ export function createForm(prefectures: string[]): HTMLFormElement {
       label,
     );
   }
+  const customRates = document.createElement("div");
+  customRates.className = "form-grid";
+  const help = document.createElement("p");
+  help.textContent =
+    "料率は労使合計を入力し、本人負担は折半として計算します。事業主負担が大きい場合は本人料率の2倍を合計として入力してください。";
+  customRates.append(help);
+  for (const [name, label] of [
+    ["healthTotalRatePercent", "健康保険料率 合計（%）"],
+    ["careTotalRatePercent", "介護保険料率（%）"],
+    ["childSupportTotalRatePercent", "子ども・子育て支援金率（%）"],
+  ]) {
+    const l = document.createElement("label");
+    l.textContent = label ?? "";
+    const input = document.createElement("input");
+    input.name = name ?? "";
+    input.type = "number";
+    input.step = "any";
+    l.append(input);
+    customRates.append(l);
+  }
+  groups[0]?.append(customRates);
+  const insurer = form.querySelector<HTMLSelectElement>('[name="insurer"]');
+  const prefecture = form.querySelector<HTMLSelectElement>('[name="prefecture"]');
+  const updateInsurer = () => {
+    const isCustom = insurer?.value !== "kyokai-kenpo";
+    customRates.hidden = !isCustom;
+    if (prefecture?.parentElement) prefecture.parentElement.hidden = isCustom;
+  };
+  insurer?.addEventListener("change", updateInsurer);
+  updateInsurer();
   const events = document.createElement("fieldset");
   const legend = document.createElement("legend");
   legend.textContent = "昇給イベント";
@@ -197,6 +227,10 @@ export function readForm(form: HTMLFormElement, version: string): FormValues {
     events: ages.map((age, i) => ({ age: String(age), rate: String(rates[i] ?? "") })),
     bonusMode: get("bonusMode"),
     prefecture: get("prefecture"),
+    insurer: get("insurer"),
+    healthTotalRatePercent: get("healthTotalRatePercent"),
+    careTotalRatePercent: get("careTotalRatePercent"),
+    childSupportTotalRatePercent: get("childSupportTotalRatePercent"),
     dcContribution: get("dcContribution"),
     idecoContribution: get("idecoContribution"),
     dcCost: get("dcCost"),

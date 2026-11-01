@@ -54,7 +54,22 @@ export function validateSimulationInput(input: SimulationInput): string[] {
     errors.push("受給終了年齢は受給開始年齢より大きくしてください。");
   }
   if (profile.insurer !== "kyokai-kenpo") {
-    errors.push("協会けんぽ以外の健康保険者は未対応です。");
+    for (const [label, value, positive] of [
+      ["健康保険料率", profile.customHealthRates?.healthTotalRatePercent, true],
+      ["介護保険料率", profile.customHealthRates?.careTotalRatePercent, false],
+      ["子ども・子育て支援金率", profile.customHealthRates?.childSupportTotalRatePercent, false],
+    ] as const) {
+      if (
+        value === undefined ||
+        !Number.isFinite(value) ||
+        value < 0 ||
+        value > 20 ||
+        (positive && value === 0)
+      )
+        errors.push(
+          `${label}は${positive ? "0より大きく" : "0以上"}、20以下の数値で入力してください。`,
+        );
+    }
   }
   errors.push(...validateSalaryProfile(salary));
   const contributions: [string, number][] = [
@@ -112,6 +127,26 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
   if (errors.length > 0) throw new SimulationInputError(errors);
 
   const { profile, salary, plan, assumptions } = input;
+  const custom = profile.insurer !== "kyokai-kenpo";
+  const rates = profile.customHealthRates;
+  const effectiveSet =
+    custom && rates
+      ? {
+          ...set,
+          health: {
+            ...set.health,
+            healthTotalRatePercentByPrefecture: { custom: rates.healthTotalRatePercent },
+            careTotalRatePercent: rates.careTotalRatePercent,
+            childSupportTotalRatePercent: rates.childSupportTotalRatePercent,
+          },
+        }
+      : set;
+  const versions = custom
+    ? [
+        ...set.versions.filter((v) => !v.startsWith("health-insurance:")),
+        "健康保険料率: 利用者入力",
+      ]
+    : set.versions;
   const dcParams: InvestmentParams = {
     grossAnnualReturn: assumptions.grossAnnualReturn,
     annualCostRate: plan.dcAnnualCostRate,
@@ -145,8 +180,8 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
     if (y) {
       const bonus = splitBonus(y.annualBonusYen);
       const siFor = (monthly: Yen): SocialInsuranceResult =>
-        annualSocialInsurance(set, {
-          prefecture: profile.prefecture,
+        annualSocialInsurance(effectiveSet, {
+          prefecture: custom ? "custom" : profile.prefecture,
           age,
           monthlyRemunerationYen: monthly,
           bonusPaymentsYen: bonus,
@@ -220,7 +255,7 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
           fixedFeeYen: dcFlow.fixedFeeYen,
           trustFeeYen: dcFlow.trustFeeYen,
         },
-        sources: set.versions,
+        sources: versions,
       };
       idecoResult = {
         grossPayYen: y.annualGrossYen,
@@ -239,7 +274,7 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
           fixedFeeYen: idecoFlow.fixedFeeYen,
           trustFeeYen: idecoFlow.trustFeeYen,
         },
-        sources: set.versions,
+        sources: versions,
       };
       accrualsDc.push(
         annualAccrualYen(
@@ -270,7 +305,7 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
           fixedFeeYen: dcFlow.fixedFeeYen,
           trustFeeYen: dcFlow.trustFeeYen,
         },
-        sources: set.versions,
+        sources: versions,
       };
       idecoResult = {
         grossPayYen: 0,
@@ -282,7 +317,7 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
           fixedFeeYen: idecoFlow.fixedFeeYen,
           trustFeeYen: idecoFlow.trustFeeYen,
         },
-        sources: set.versions,
+        sources: versions,
       };
     }
 
@@ -335,6 +370,10 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
   });
 
   const warnings = [...set.warnings];
+  if (custom)
+    warnings.push(
+      "健康保険料率は利用者入力の値です。等級表と賞与上限は法定の共通表を使っています。",
+    );
   if (plan.initialBalanceYen > 0) {
     warnings.push("初期運用資産は比較に含めていません。既存資産の移換は新規掛金とは別の判断です。");
   }
@@ -372,8 +411,15 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
       lifetimeNominalDifferenceYen: cumNominal.at(-1) ?? 0,
       lifetimePresentValueDifferenceYen: cumPv.at(-1) ?? 0,
     },
-    regulationVersion: set.versions.join(" / "),
-    assumptions: [...ASSUMPTIONS],
+    regulationVersion: versions.join(" / "),
+    assumptions: [
+      ...ASSUMPTIONS,
+      ...(custom
+        ? [
+            "健康保険料率は利用者入力の労使合計を折半します。事業主負担が大きい場合は本人料率の2倍を入力します。",
+          ]
+        : []),
+    ],
     warnings: [...new Set(warnings)],
   };
 }

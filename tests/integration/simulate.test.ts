@@ -77,6 +77,23 @@ describe("annualSocialInsurance against bundled 2026 data (hand-derived)", () =>
 });
 
 describe("simulate", () => {
+  it("uses entered rates and validates their range", () => {
+    const input = baseInput();
+    const original = simulate(input, set);
+    input.profile.insurer = "kenpo-kumiai";
+    input.profile.customHealthRates = {
+      healthTotalRatePercent: set.health.healthTotalRatePercentByPrefecture.tokyo ?? 0,
+      careTotalRatePercent: set.health.careTotalRatePercent,
+      childSupportTotalRatePercent: set.health.childSupportTotalRatePercent,
+    };
+    const result = simulate(input, set);
+    expect(result.summary).toEqual(original.summary);
+    expect(result.warnings).toContain(
+      "健康保険料率は利用者入力の値です。等級表と賞与上限は法定の共通表を使っています。",
+    );
+    input.profile.customHealthRates.healthTotalRatePercent = 21;
+    expect(() => simulate(input, set)).toThrow(SimulationInputError);
+  });
   it("rejects invalid input instead of returning a precise-looking result", () => {
     const bad = baseInput();
     bad.salary.annualIncomeYen = 1;

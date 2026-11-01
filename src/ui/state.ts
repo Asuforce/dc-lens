@@ -12,6 +12,10 @@ export interface FormValues {
   events: { age: string; rate: string }[];
   bonusMode: string;
   prefecture: string;
+  insurer?: string;
+  healthTotalRatePercent?: string;
+  careTotalRatePercent?: string;
+  childSupportTotalRatePercent?: string;
   dcContribution: string;
   idecoContribution: string;
   dcCost: string;
@@ -48,7 +52,9 @@ export function parseForm(
     errors.push(
       "年収は月給の12か月分と賞与の合計にしてください。推定月給は整数円である必要があります。",
     );
-  if (!v.prefecture) errors.push("都道府県を選択してください。");
+  const insurer =
+    v.insurer === "kenpo-kumiai" || v.insurer === "custom" ? v.insurer : "kyokai-kenpo";
+  if (insurer === "kyokai-kenpo" && !v.prefecture) errors.push("都道府県を選択してください。");
   const input: SimulationInput = {
     profile: {
       age: n(v.age, "年齢"),
@@ -56,7 +62,19 @@ export function parseForm(
       pensionStartAge: n(v.pensionStartAge, "年金受給開始年齢"),
       pensionEndAge: n(v.pensionEndAge, "受給終了年齢"),
       prefecture: v.prefecture,
-      insurer: "kyokai-kenpo",
+      insurer,
+      ...(insurer !== "kyokai-kenpo"
+        ? {
+            customHealthRates: {
+              healthTotalRatePercent: n(v.healthTotalRatePercent ?? "", "健康保険料率"),
+              careTotalRatePercent: n(v.careTotalRatePercent ?? "", "介護保険料率"),
+              childSupportTotalRatePercent: n(
+                v.childSupportTotalRatePercent ?? "",
+                "子ども・子育て支援金率",
+              ),
+            },
+          }
+        : {}),
     },
     salary: {
       annualIncomeYen: annual,
