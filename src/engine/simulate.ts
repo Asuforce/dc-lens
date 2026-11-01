@@ -75,7 +75,6 @@ export function validateSimulationInput(input: SimulationInput): string[] {
   const contributions: [string, number][] = [
     ["選択制DC掛金", plan.dcMonthlyContributionYen],
     ["iDeCo掛金", plan.idecoMonthlyContributionYen],
-    ["初期運用資産", plan.initialBalanceYen],
   ];
   for (const [label, v] of contributions) {
     if (!Number.isInteger(v) || v < 0) errors.push(`${label}は0以上の整数円で入力してください。`);
@@ -374,9 +373,6 @@ export function simulate(input: SimulationInput, set: RegulationSet): Simulation
     warnings.push(
       "健康保険料率は利用者入力の値です。等級表と賞与上限は法定の共通表を使っています。",
     );
-  if (plan.initialBalanceYen > 0) {
-    warnings.push("初期運用資産は比較に含めていません。既存資産の移換は新規掛金とは別の判断です。");
-  }
   if (set.contributionLimit) {
     for (const [name, amount, cap] of [
       ["選択制DC", plan.dcMonthlyContributionYen, set.contributionLimit.payload.dcMonthlyYen],

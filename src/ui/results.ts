@@ -1,3 +1,4 @@
+import type { TransferResult } from "../engine/transfer.ts";
 import type { SimulationResult } from "../engine/types.ts";
 import { resultToCsv } from "../lib/csv.ts";
 import type { Dataset } from "../regulations/schema.ts";
@@ -8,6 +9,25 @@ function node(tag: string, text: string): HTMLElement {
   const e = document.createElement(tag);
   e.textContent = text;
   return e;
+}
+export function renderTransfer(result: TransferResult): HTMLElement {
+  const section = document.createElement("section");
+  section.id = "transfer-result";
+  section.append(
+    node("h2", "既存資産の移換（税引前評価額）"),
+    node("p", "新規掛金とは別の判断です。差額は移換後 − 継続、正の値は移換が有利です。"),
+  );
+  for (const [label, value] of [
+    ["iDeCoで継続", result.keepBalanceAtRetirementYen],
+    ["DCへ移換", result.moveBalanceAtRetirementYen],
+    ["差額", result.differenceYen],
+    ["差額の現在価値", result.presentValueDifferenceYen],
+  ] as const)
+    section.append(node("p", `${label}: ${yen(value)}`));
+  const list = document.createElement("ul");
+  for (const text of [...result.warnings, ...result.assumptions]) list.append(node("li", text));
+  section.append(list);
+  return section;
 }
 export function renderResults(
   result: SimulationResult,

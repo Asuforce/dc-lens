@@ -1,3 +1,4 @@
+import { type TransferInput, validateTransferInput } from "../engine/transfer.ts";
 import type { SimulationInput } from "../engine/types.ts";
 
 export interface FormValues {
@@ -21,7 +22,10 @@ export interface FormValues {
   dcCost: string;
   idecoCost: string;
   fixedFee: string;
-  initialBalance: string;
+  transferEnabled?: boolean;
+  transferBalance?: string;
+  transferFee?: string;
+  idleMonths?: string;
   grossReturn: string;
   inflation: string;
   discount: string;
@@ -30,7 +34,9 @@ export interface FormValues {
 }
 export function parseForm(
   v: FormValues,
-): { ok: true; input: SimulationInput } | { ok: false; errors: string[] } {
+):
+  | { ok: true; input: SimulationInput; transfer?: TransferInput }
+  | { ok: false; errors: string[] } {
   const errors: string[] = [];
   const n = (value: string, label: string): number => {
     if (value.trim() === "" || !Number.isFinite(Number(value))) {
@@ -95,7 +101,6 @@ export function parseForm(
       dcAnnualCostRate: n(v.dcCost, "DC年率コスト") / 100,
       idecoAnnualCostRate: n(v.idecoCost, "iDeCo年率コスト") / 100,
       idecoFixedMonthlyFeeYen: n(v.fixedFee, "iDeCo固定費"),
-      initialBalanceYen: n(v.initialBalance, "初期運用資産"),
     },
     assumptions: {
       grossAnnualReturn: n(v.grossReturn, "想定利回り") / 100,
@@ -106,5 +111,23 @@ export function parseForm(
     },
     regulationVersion: v.regulationVersion,
   };
-  return errors.length ? { ok: false, errors } : { ok: true, input };
+  const transfer: TransferInput | undefined = v.transferEnabled
+    ? {
+        balanceYen: n(v.transferBalance ?? "", "移換する既存資産"),
+        transferFeeYen: n(v.transferFee ?? "", "移換手数料"),
+        idleMonths: n(v.idleMonths ?? "", "移換期間"),
+        yearsToRetirement: input.profile.retirementAge - input.profile.age,
+        grossAnnualReturn: input.assumptions.grossAnnualReturn,
+        keep: {
+          annualCostRate: input.plan.idecoAnnualCostRate,
+          fixedMonthlyFeeYen: input.plan.idecoFixedMonthlyFeeYen,
+        },
+        move: { annualCostRate: input.plan.dcAnnualCostRate, fixedMonthlyFeeYen: 0 },
+        discountRate: input.assumptions.discountRate,
+      }
+    : undefined;
+  if (transfer) errors.push(...validateTransferInput(transfer));
+  return errors.length
+    ? { ok: false, errors }
+    : { ok: true, input, ...(transfer ? { transfer } : {}) };
 }

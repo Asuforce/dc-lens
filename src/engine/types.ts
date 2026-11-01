@@ -41,7 +41,6 @@ export interface PensionPlan {
   dcAnnualCostRate: number;
   idecoAnnualCostRate: number;
   idecoFixedMonthlyFeeYen: Yen;
-  initialBalanceYen: Yen;
 }
 
 export interface ProjectionAssumptions {

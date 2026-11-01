@@ -1,6 +1,33 @@
 import { expect, test } from "@playwright/test";
 import { fill } from "./helpers.ts";
 
+test("compares transfer separately without sending or storing inputs", async ({
+  page,
+  baseURL,
+}) => {
+  const external: string[] = [];
+  page.on("request", (request) => {
+    if (!request.url().startsWith(baseURL ?? "")) external.push(request.url());
+  });
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto("/");
+  await fill(page);
+  await page.getByLabel("既存資産の移換も比較する").check();
+  await page.getByLabel("移換する既存資産（円）").fill("12000");
+  await page.getByLabel("移換手数料（円）").fill("110");
+  await page.getByLabel("移換期間（月）").fill("2");
+  await page.getByRole("button", { name: "比較する" }).click();
+  await expect(page.locator("#transfer-result")).toContainText("新規掛金とは別の判断");
+  await expect(page.locator("#transfer-result")).toContainText("iDeCoで継続");
+  await expect(page.locator("#transfer-result")).toContainText("DCへ移換");
+  await expect(page.locator("#transfer-result")).toContainText("差額");
+  await expect(page.locator("#summary .cards")).toBeVisible();
+  expect(await page.evaluate(() => [localStorage.length, sessionStorage.length])).toEqual([0, 0]);
+  expect(external).toEqual([]);
+  await page.getByLabel("既存資産の移換も比較する").uncheck();
+  await expect(page.locator("#transfer-result")).toHaveCount(0);
+});
+
 test("custom insurer rates remain local and appear in evidence", async ({ page }) => {
   const requests: string[] = [];
   page.on("request", (r) => requests.push(`${r.url()} ${r.postData() ?? ""}`));
@@ -170,7 +197,6 @@ test("keyboard navigation submits and opens details", async ({ page }) => {
     dcCost: "0.3",
     idecoCost: "0.3",
     fixedFee: "0",
-    initialBalance: "0",
     grossReturn: "3",
     inflation: "1",
     discount: "2",

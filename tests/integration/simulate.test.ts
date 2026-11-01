@@ -34,7 +34,6 @@ function baseInput(overrides: Partial<SimulationInput["plan"]> = {}): Simulation
       dcAnnualCostRate: 0.003,
       idecoAnnualCostRate: 0.003,
       idecoFixedMonthlyFeeYen: 0,
-      initialBalanceYen: 0,
       ...overrides,
     },
     assumptions: {
@@ -165,10 +164,9 @@ describe("simulate", () => {
   });
 
   it("carries the regulation version, assumptions, and warnings", () => {
-    const r = simulate(baseInput({ initialBalanceYen: 1_000_000 }), set);
+    const r = simulate(baseInput(), set);
     expect(r.regulationVersion).toContain("income-tax");
     expect(r.assumptions.length).toBeGreaterThan(0);
-    expect(r.warnings.some((w) => w.includes("初期運用資産"))).toBe(true);
     expect(r.warnings.some((w) => w.includes("加入資格"))).toBe(true);
   });
 });

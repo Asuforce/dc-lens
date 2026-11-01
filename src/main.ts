@@ -1,8 +1,9 @@
 import { SimulationInputError, simulate } from "./engine/simulate.ts";
+import { compareTransfer } from "./engine/transfer.ts";
 import { ALL_DATASETS } from "./regulations/all-datasets.ts";
 import { resolveRegulationSet } from "./regulations/loader.ts";
 import { createForm, readForm } from "./ui/form.ts";
-import { renderResults } from "./ui/results.ts";
+import { renderResults, renderTransfer } from "./ui/results.ts";
 import {
   addScenario,
   removeScenario,
@@ -72,6 +73,7 @@ if (!resolved.ok) {
           parsed.input.assumptions.valuation,
         ),
       );
+      if (parsed.transfer) output.append(renderTransfer(compareTransfer(parsed.transfer)));
       const label = document.createElement("label");
       label.textContent = "シナリオ名";
       const input = document.createElement("input");
@@ -113,6 +115,10 @@ if (!resolved.ok) {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     run();
+  });
+  form.querySelector('[name="transferEnabled"]')?.addEventListener("change", () => {
+    if (!form.querySelector<HTMLInputElement>('[name="transferEnabled"]')?.checked)
+      output.querySelector("#transfer-result")?.remove();
   });
   form.querySelector('[name="valuation"]')?.addEventListener("change", () => {
     if (submitted) run();

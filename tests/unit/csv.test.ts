@@ -32,7 +32,6 @@ function baseInput(overrides: Partial<SimulationInput["plan"]> = {}): Simulation
       dcAnnualCostRate: 0.003,
       idecoAnnualCostRate: 0.003,
       idecoFixedMonthlyFeeYen: 0,
-      initialBalanceYen: 0,
       ...overrides,
     },
     assumptions: {
