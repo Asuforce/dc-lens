@@ -99,3 +99,15 @@ describe("validateDataset", () => {
     expect(validateDataset({ meta, payload: grades }).ok).toBe(true);
   });
 });
+
+describe("contribution limits", () => {
+  it("validates positive integer caps", () => {
+    const m = { ...meta, kind: "contribution-limit" };
+    expect(validateDataset({ meta: m, payload: { dcMonthlyYen: 1, idecoMonthlyYen: 2 } }).ok).toBe(
+      true,
+    );
+    expect(
+      validateDataset({ meta: m, payload: { dcMonthlyYen: 0, idecoMonthlyYen: 2.5 } }).ok,
+    ).toBe(false);
+  });
+});

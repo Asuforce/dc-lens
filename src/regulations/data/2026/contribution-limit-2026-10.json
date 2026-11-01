@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "version": "2026-10",
+    "kind": "contribution-limit",
+    "effectiveFrom": "2024-12-01",
+    "effectiveTo": "2026-11-30",
+    "status": "verified",
+    "verifiedAt": "2026-10-30",
+    "sourceName": "確定拠出年金法施行令11条・36条、国民年金基金連合会",
+    "sourceUrl": "https://www.ideco-koushiki.jp/start/entry.html",
+    "note": "国民年金基金連合会表「企業年金等に加入していない第２号加入者の方 | 23,000円」、DC令11条一号「五万五千円」。開始日は令和6年改正の施行日から導出、終了日は2026-12-01の変更前日から導出。経過措置: DC令改正附則により令和6年12月時点で企業型DCを実施していた事業主の加入者には、他制度掛金相当額を控除して零を下回る場合の読替えで27,500円が適用され得る（「零」→「二万七千五百円」）。厚労省事務連絡 https://www.mhlw.go.jp/content/12500000/001723426.pdf は「従前のとおり2.75万円」。他制度(DB等)の掛金相当額の控除は未対応。"
+  },
+  "payload": {
+    "dcMonthlyYen": 55000,
+    "idecoMonthlyYen": 23000
+  }
+}

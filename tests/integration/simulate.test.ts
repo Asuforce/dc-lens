@@ -152,6 +152,24 @@ describe("simulate", () => {
     expect(r.regulationVersion).toContain("income-tax");
     expect(r.assumptions.length).toBeGreaterThan(0);
     expect(r.warnings.some((w) => w.includes("初期運用資産"))).toBe(true);
-    expect(r.warnings.some((w) => w.includes("拠出限度額"))).toBe(true);
+    expect(r.warnings.some((w) => w.includes("加入資格"))).toBe(true);
   });
+});
+
+it("warns only above each contribution cap", () => {
+  for (const [field, cap, name] of [
+    ["dcMonthlyContributionYen", 55000, "選択制DC"],
+    ["idecoMonthlyContributionYen", 23000, "iDeCo"],
+  ] as const) {
+    expect(
+      simulate(baseInput({ [field]: cap }), set).warnings.some((w) =>
+        w.includes(`${name}の月額掛金`),
+      ),
+    ).toBe(false);
+    expect(
+      simulate(baseInput({ [field]: cap + 1 }), set).warnings.some((w) =>
+        w.includes(`${name}の月額掛金`),
+      ),
+    ).toBe(true);
+  }
 });

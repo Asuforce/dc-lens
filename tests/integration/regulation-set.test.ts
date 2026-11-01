@@ -7,7 +7,7 @@ describe("resolveRegulationSet with the bundled datasets", () => {
     const r = resolveRegulationSet(ALL_DATASETS, "2026-10-29", "precise");
     expect(r.ok).toBe(true);
     if (r.ok) {
-      expect(r.set.versions).toHaveLength(5);
+      expect(r.set.versions).toHaveLength(6);
       expect(r.set.warnings.length).toBeGreaterThan(0);
     }
   });
@@ -16,4 +16,18 @@ describe("resolveRegulationSet with the bundled datasets", () => {
     const r = resolveRegulationSet(ALL_DATASETS, "2000-01-01", "precise");
     expect(r.ok).toBe(false);
   });
+});
+
+it("contribution limit follows the effective date and can be absent", () => {
+  const before = resolveRegulationSet(ALL_DATASETS, "2026-11-30", "precise");
+  const after = resolveRegulationSet(ALL_DATASETS, "2026-12-01", "precise");
+  const absent = resolveRegulationSet(
+    ALL_DATASETS.filter((d) => d.meta.kind !== "contribution-limit"),
+    "2026-11-30",
+    "precise",
+  );
+  if (!before.ok || !after.ok || !absent.ok) throw new Error("resolution failed");
+  expect(before.set.contributionLimit?.status).toBe("verified");
+  expect(after.set.contributionLimit?.status).toBe("planned");
+  expect(absent.set.contributionLimit).toBeNull();
 });
