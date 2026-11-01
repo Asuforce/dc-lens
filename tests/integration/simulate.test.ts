@@ -141,16 +141,20 @@ describe("simulate", () => {
     const row = result.yearlyResults.findLast((year) => year.age < input.profile.retirementAge);
     expect(row).toBeDefined();
     if (!row) throw new Error("missing working year");
-    const payout = afterTaxPayout(result, input, 3, set);
+    const payout = afterTaxPayout(result, input, set);
     expect(payout.dc.afterTaxYen + payout.dc.totalTaxYen).toBe(row.dc.investmentBalanceYen);
     expect(payout.ideco.afterTaxYen + payout.ideco.totalTaxYen).toBe(
       row.ideco.investmentBalanceYen,
     );
-    expect(payout.serviceYears).toBe(input.profile.retirementAge - input.profile.age + 3);
+    expect(payout.serviceYears).toBe(input.profile.retirementAge - input.profile.age);
     expect(result).toEqual(before);
     expect(simulate(input, set)).toEqual(before);
-    expect(() => afterTaxPayout(result, input, -1, set)).toThrow();
-    expect(() => afterTaxPayout(result, input, 1.5, set)).toThrow();
+    expect(payout.warnings.some((w) => w.includes("60歳未満"))).toBe(false);
+    const early = baseInput();
+    early.profile.retirementAge = 55;
+    expect(
+      afterTaxPayout(simulate(early, set), early, set).warnings.some((w) => w.includes("60歳未満")),
+    ).toBe(true);
   });
   it("uses entered rates and validates their range", () => {
     const input = baseInput();

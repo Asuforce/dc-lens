@@ -41,9 +41,6 @@ section {
   background: #e2f2ed;
   color: #163d35;
 }
-.form-grid[hidden] {
-  display: none;
-}
 
 .form-grid,
 .cards {
@@ -196,4 +193,8 @@ footer {
   .second {
     stroke: #ffb58f;
   }
+}
+
+[hidden] {
+  display: none;
 }

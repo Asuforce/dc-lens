@@ -107,8 +107,8 @@ export function resolveRegulationSet(
   }
   if (errors.length > 0) return { ok: false, errors };
 
-  const limit = selectDataset(datasets, "contribution-limit", baseDate, "draft");
-  if (limit.ok && limit.dataset.meta.status !== "provisional") {
+  const limit = selectDataset(datasets, "contribution-limit", baseDate, mode);
+  if (limit.ok) {
     picked.set("contribution-limit", limit.dataset);
   }
   const get = <P>(kind: DatasetKind): P => (picked.get(kind) as Dataset<P>).payload;
@@ -125,8 +125,15 @@ export function resolveRegulationSet(
       );
     }
   }
-  if (!picked.has("contribution-limit"))
-    warnings.push("拠出限度額の制度データがないため、限度額は確認していません。");
+  if (!picked.has("contribution-limit")) {
+    const detail =
+      !limit.ok && limit.reason === "not-verified"
+        ? "（該当する版は検証前です）"
+        : !limit.ok && limit.reason === "invalid"
+          ? "（該当する版の期間が重複しています）"
+          : "";
+    warnings.push(`拠出限度額は検証済みのデータがないため、限度額は確認していません${detail}。`);
+  }
   for (const d of picked.values()) {
     if (d.meta.effectiveTo !== null) {
       warnings.push(

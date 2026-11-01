@@ -38,7 +38,9 @@ export function lumpSumTax(
     0,
     Math.floor((taxableRetirementIncomeYen * bracket.ratePercent) / 100) - bracket.deductionYen,
   );
-  const incomeTaxYen = Math.floor((base * (100 + set.incomeTax.surtaxTotalPercent)) / 100);
+  const incomeTaxYen = Math.floor(
+    (base * Math.round((100 + set.incomeTax.surtaxTotalPercent) * 1000)) / 100000,
+  );
   const residentTaxPrefecturalYen = floorTo(
     100,
     (taxableRetirementIncomeYen * p.residentPrefecturalPercent) / 100,
@@ -65,14 +67,11 @@ export function lumpSumTax(
 export function afterTaxPayout(
   result: SimulationResult,
   input: SimulationInput,
-  priorServiceYears: number,
   set: RegulationSet,
 ) {
-  if (!Number.isSafeInteger(priorServiceYears) || priorServiceYears < 0)
-    throw new RangeError("既存の拠出年数は0以上の整数にしてください。");
   const row = result.yearlyResults.findLast((r) => r.age < input.profile.retirementAge);
   if (!row) throw new RangeError("退職前の結果がありません。");
-  const serviceYears = input.profile.retirementAge - input.profile.age + priorServiceYears;
+  const serviceYears = input.profile.retirementAge - input.profile.age;
   const dc = lumpSumTax({ lumpSumYen: row.dc.investmentBalanceYen, serviceYears }, set);
   const ideco = lumpSumTax({ lumpSumYen: row.ideco.investmentBalanceYen, serviceYears }, set);
   return {
@@ -81,6 +80,12 @@ export function afterTaxPayout(
     afterTaxDifferenceYen: dc.afterTaxYen - ideco.afterTaxYen,
     serviceYears,
     warnings: [
+      ...(input.profile.retirementAge < 60
+        ? [
+            "退職年齢が60歳未満です。DCとiDeCoの老齢給付は原則60歳以降に受け取るため、この試算は実際の受取時期を表しません。",
+          ]
+        : []),
+      "勤続年数は今回の試算期間だけで数え、すでに拠出した期間とその資産は含めません。控除は小さめ、課税対象も今回の資産だけです。",
       "短期退職手当等、特定役員退職手当等、障害者退職の加算、過去の退職手当との勤続期間の重複控除、他の退職金との合算、確定申告での他所得との選択は対象外です。",
       "勤続5年以下は短期退職手当等に当たり得ます。",
       "年金受取は未対応です。2048年以降の税率変更は対象外です。",

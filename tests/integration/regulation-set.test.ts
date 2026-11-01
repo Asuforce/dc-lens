@@ -28,6 +28,11 @@ it("contribution limit follows the effective date and can be absent", () => {
   );
   if (!before.ok || !after.ok || !absent.ok) throw new Error("resolution failed");
   expect(before.set.contributionLimit?.status).toBe("verified");
-  expect(after.set.contributionLimit?.status).toBe("planned");
+  expect(after.set.contributionLimit).toBeNull();
+  expect(
+    after.set.warnings.some(
+      (w) => w.includes("検証済みのデータがない") && w.includes("検証前です"),
+    ),
+  ).toBe(true);
   expect(absent.set.contributionLimit).toBeNull();
 });
