@@ -4,6 +4,7 @@ import { compareTransfer } from "./engine/transfer.ts";
 import { ALL_DATASETS } from "./regulations/all-datasets.ts";
 import { resolveRegulationSet } from "./regulations/loader.ts";
 import { createForm, readForm } from "./ui/form.ts";
+import { createQuickForm } from "./ui/quick.ts";
 import { renderPayout, renderResults, renderTransfer } from "./ui/results.ts";
 import {
   addScenario,
@@ -32,7 +33,21 @@ if (!resolved.ok) {
 } else {
   const set = resolved.set;
   const form = createForm(Object.keys(set.health.healthTotalRatePercentByPrefecture));
-  element("form-container").append(form);
+  const quick = createQuickForm(set, output, errors);
+  const switcher = document.createElement("button");
+  switcher.type = "button";
+  switcher.textContent = "詳細入力に切り替える";
+  switcher.setAttribute("aria-expanded", "false");
+  form.hidden = true;
+  switcher.addEventListener("click", () => {
+    form.hidden = !form.hidden;
+    quick.hidden = !form.hidden;
+    switcher.textContent = form.hidden ? "詳細入力に切り替える" : "簡易入力に切り替える";
+    switcher.setAttribute("aria-expanded", String(!form.hidden));
+    output.replaceChildren();
+    errors.textContent = "";
+  });
+  element("form-container").append(switcher, quick, form);
   let scenarios: ScenarioEntry[] = [];
   let nextId = 1;
   const comparison = document.createElement("section");

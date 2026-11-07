@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 export async function fill(page: Page) {
+  await page.getByRole("button", { name: "詳細入力に切り替える" }).click();
   for (const [name, value] of Object.entries({
     age: "35",
     retirementAge: "60",

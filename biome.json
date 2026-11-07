@@ -5,6 +5,7 @@
     "includes": [
       "**",
       "!dist",
+      "!.wrangler",
       "!test-results",
       "!playwright-report",
       "!.claude",

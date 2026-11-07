@@ -236,6 +236,8 @@ test("zero contributions and invalid contribution", async ({ page }) => {
 
 test("keyboard navigation submits and opens details", async ({ page }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "詳細入力に切り替える" }).focus();
+  await page.keyboard.press("Enter");
   const values: Record<string, string> = {
     age: "35",
     retirementAge: "60",
