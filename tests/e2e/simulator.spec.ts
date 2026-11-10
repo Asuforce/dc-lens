@@ -7,18 +7,18 @@ test("switches detailed mode while keeping inputs local", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 });
   await page.goto("/");
   await fill(page);
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   const simple = await page.locator("#summary .cards").first().textContent();
-  await page.getByLabel("計算モード").selectOption("detailed");
-  await page.getByLabel("昇給月").selectOption("7");
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByLabel("計算モード").and(page.locator("input, select")).selectOption("detailed");
+  await page.getByLabel("昇給月").and(page.locator("input, select")).selectOption("7");
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   await page.getByText("年次詳細", { exact: true }).click();
   await expect(
     page.getByRole("columnheader", { name: "標準報酬月額 厚年 / 健保 (DC → iDeCo)" }),
   ).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.getByLabel("計算モード").selectOption("simple");
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByLabel("計算モード").and(page.locator("input, select")).selectOption("simple");
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   await expect(
     page.getByRole("columnheader", { name: "標準報酬月額 厚年 / 健保 (DC → iDeCo)" }),
   ).toHaveCount(0);
@@ -40,15 +40,17 @@ test("shows optional payout tax without sending or storing inputs", async ({ pag
   await page.goto("/");
   const origin = new URL(page.url()).origin;
   await fill(page);
-  const toggle = page.getByLabel("一時金で受け取る場合の課税も試算する");
+  const toggle = page
+    .getByLabel("一時金で受け取る場合の課税も試算する")
+    .and(page.locator("input, select"));
   await toggle.check();
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   const payout = page.locator("#payout-result");
   await expect(payout.getByRole("heading", { name: "一時金受取時の課税（試算）" })).toBeVisible();
   await expect(payout.getByText(/短期退職手当等、特定役員退職手当等.*対象外/)).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await toggle.uncheck();
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   await expect(payout).toHaveCount(0);
   expect(requests.every((url) => new URL(url).origin === origin)).toBe(true);
   expect(await page.evaluate(() => [localStorage.length, sessionStorage.length])).toEqual([0, 0]);
@@ -65,11 +67,11 @@ test("compares transfer separately without sending or storing inputs", async ({
   await page.setViewportSize({ width: 375, height: 667 });
   await page.goto("/");
   await fill(page);
-  await page.getByLabel("既存資産の移換も比較する").check();
-  await page.getByLabel("移換する既存資産（円）").fill("12000");
-  await page.getByLabel("移換手数料（円）").fill("110");
-  await page.getByLabel("移換期間（月）").fill("2");
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByLabel("既存資産の移換も比較する").and(page.locator("input, select")).check();
+  await page.getByLabel("移換する既存資産（円）").and(page.locator("input, select")).fill("12000");
+  await page.getByLabel("移換手数料（円）").and(page.locator("input, select")).fill("110");
+  await page.getByLabel("移換期間（月）").and(page.locator("input, select")).fill("2");
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   await expect(page.locator("#transfer-result")).toContainText("新規掛金とは別の判断");
   await expect(page.locator("#transfer-result")).toContainText("iDeCoで継続");
   await expect(page.locator("#transfer-result")).toContainText("DCへ移換");
@@ -77,7 +79,7 @@ test("compares transfer separately without sending or storing inputs", async ({
   await expect(page.locator("#summary .cards").first()).toBeVisible();
   expect(await page.evaluate(() => [localStorage.length, sessionStorage.length])).toEqual([0, 0]);
   expect(external).toEqual([]);
-  await page.getByLabel("既存資産の移換も比較する").uncheck();
+  await page.getByLabel("既存資産の移換も比較する").and(page.locator("input, select")).uncheck();
   await expect(page.locator("#transfer-result")).toHaveCount(0);
 });
 
@@ -90,7 +92,7 @@ test("custom insurer rates remain local and appear in evidence", async ({ page }
   await page.locator('[name="healthTotalRatePercent"]').fill("9.0");
   await page.locator('[name="careTotalRatePercent"]').fill("1.6");
   await page.locator('[name="childSupportTotalRatePercent"]').fill("0.2");
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   await page.getByText("計算根拠", { exact: true }).click();
   await expect(page.locator("#summary")).toContainText("健康保険料率: 利用者入力");
   expect(requests.join(" ")).not.toMatch(/9\.0|1\.6|0\.2/);
@@ -107,12 +109,12 @@ test("submits, updates results, and exposes sources without sending inputs", asy
   });
   await page.goto("/");
   await fill(page);
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   await expect(page.locator("#summary")).toBeVisible();
   await expect(page.locator("svg")).toHaveCount(2);
   const before = await page.locator("#summary").textContent();
   await page.locator('[name="dcContribution"]').fill("10000");
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   expect(await page.locator("#summary").textContent()).not.toBe(before);
   await page.locator('[name="valuation"]').selectOption("present-value");
   await expect(page.getByRole("heading", { name: "損益分岐年齢（現在価値）" })).toBeVisible();
@@ -125,7 +127,7 @@ test("invalid income clears result", async ({ page }) => {
   await page.goto("/");
   await fill(page);
   await page.locator('[name="annualIncome"]').fill("1");
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   await expect(page.locator("#errors")).toContainText("年収");
   await expect(page.locator("#summary")).toHaveCount(0);
 });
@@ -152,7 +154,7 @@ test("privacy, evidence, charts and mobile tables", async ({ page }) => {
   );
   await page.goto("/");
   await fill(page);
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   await page.locator('[name="valuation"]').selectOption("present-value");
   for (const detail of await page.locator("#summary details").all())
     await detail.locator("summary").click();
@@ -212,12 +214,12 @@ test("zero contributions and invalid contribution", async ({ page }) => {
   await page.goto("/");
   await fill(page);
   await page.locator('[name="dcContribution"]').fill("400000");
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   await expect(page.locator("#errors")).not.toBeEmpty();
   await expect(page.locator("#errors")).toBeFocused();
   await page.locator('[name="dcContribution"]').fill("0");
   await page.locator('[name="idecoContribution"]').fill("0");
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   await expect(page.locator("#summary")).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "損益分岐年齢（名目）" }).locator("+ p"),
@@ -256,11 +258,14 @@ test("keyboard navigation submits and opens details", async ({ page }) => {
     inflation: "1",
     discount: "2",
   };
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 80; i++) {
     await page.keyboard.press("Tab");
     const focused = page.locator(":focus");
     const name = await focused.getAttribute("name");
-    if (name && values[name]) await page.keyboard.type(values[name]);
+    if (name && values[name]) {
+      await page.keyboard.press("ControlOrMeta+A");
+      await page.keyboard.type(values[name]);
+    }
     if (name === "prefecture") await page.keyboard.press("End");
     if ((await focused.textContent()) === "比較する") {
       await page.keyboard.press("Enter");
@@ -296,7 +301,7 @@ test("downloads CSV without sending or storing inputs", async ({ page }) => {
   page.on("request", (request) => requests.push({ url: request.url(), method: request.method() }));
   await page.goto("/");
   await fill(page);
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   const count =
     (await page.getByText("年次詳細", { exact: true }).locator("..").locator("table tr").count()) -
     1;
@@ -324,10 +329,10 @@ test("compares session scenarios without persistence or requests", async ({ page
   await page.goto("/");
   const initialUrl = page.url();
   await fill(page);
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   await page.getByRole("button", { name: "このシナリオを比較に追加" }).click();
   await page.locator('[name="dcContribution"]').fill("10000");
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   const add = page.getByRole("button", { name: "このシナリオを比較に追加" });
   await add.click();
   await expect(page.getByRole("button", { name: /シナリオ .*を削除/ })).toHaveCount(2);
@@ -349,7 +354,7 @@ test("warns when DC contribution exceeds the cap", async ({ page }) => {
   await page.goto("/");
   await fill(page);
   await page.locator('[name="dcContribution"]').fill("70000");
-  await page.getByRole("button", { name: "比較する" }).click();
+  await page.getByRole("button", { name: "比較する", exact: true }).click();
   await expect(
     page.getByText("選択制DCの月額掛金70000円は上限55000円を超えています。", { exact: false }),
   ).toBeVisible();
