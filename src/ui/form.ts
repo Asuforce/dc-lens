@@ -19,6 +19,49 @@ const fields: [keyof FormValues, string][] = [
   ["discount", "割引率（%）"],
 ];
 const hints: Record<string, string> = {
+  age: "試算を始める時点の満年齢を入力します。誕生日がまだなら、今年迎える年齢から1を引いてください。",
+  retirementAge:
+    "給与収入と毎月の掛金を止める予定年齢を入力します。定年後も働く場合は、働き終える年齢で比較してください。",
+  pensionStartAge:
+    "年金を受け取り始める想定年齢を入力します。受給開始を変えたときの対応範囲は、結果の警告も確認してください。",
+  pensionEndAge:
+    "年金の累計額を何歳まで比較するかを指定します。寿命の予測ではありません。この年齢を変えると生涯差が変わるため、複数の年齢で比較してください。",
+  annualIncome:
+    "源泉徴収票の「支払金額」など、税・社会保険料を引く前の給与と賞与の年間合計を入力します。手取り額や副業収入は含めません。",
+  monthlySalary:
+    "税・社会保険料を引く前の月給を入力します。年収＝月給×12＋賞与となるようにしてください。空欄の場合は（年収－賞与）÷12で推定します。",
+  bonus:
+    "税・社会保険料を引く前の賞与を年間分合計します。賞与なしなら0を入力してください。月給欄に賞与を含めないでください。",
+  dcContribution:
+    "勤務先の選択制DCで、給与から事業主掛金へ振り替える月額を入力します。勤務先が別途負担する掛金は足さず、利用できる金額を人事・制度案内で確認してください。",
+  idecoContribution:
+    "iDeCoで毎月積み立てる掛金を入力します。同額掛金の比較ではDC月額とそろえてください。口座管理手数料は含めず、固定費欄へ入力します。",
+  fixedFee:
+    "iDeCoの手数料一覧や取引明細で、毎月引かれる定額手数料を合計します。年額表示なら12で割ります。信託報酬と加入時だけの手数料は含めません。",
+  prefecture:
+    "協会けんぽの加入支部を選択します。居住地と異なる場合があるため、勤務先の保険料率表や人事の案内で確認してください。",
+  bonusMode:
+    "昇給分を月給と賞与の両方に配るなら「賞与比率固定」、月給を据え置き昇給分を賞与へ配るなら「月給固定・賞与増加」を選びます。",
+  valuation:
+    "将来その時点の円額を足すなら「名目」、将来の金額を割引率で現在の価値に換算して比べるなら「現在価値」を選びます。",
+  raiseMonth:
+    "勤務先で昇給後の給与が適用される月を選びます。入金日ではなく、給与改定の対象月を給与通知で確認してください。2年目以降に適用します。",
+  healthTotalRatePercent:
+    "加入先の保険料率表から健康保険の労使合計料率を入力します。介護保険・支援金を含む総料率なら、それらを引いてください。本人負担が折半でない場合は本人料率の2倍を入力します。",
+  careTotalRatePercent:
+    "加入先の保険料率表で、健康保険とは別に記載された介護保険の労使合計料率を入力します。本人負担率だけが分かる場合は2倍します。年齢による適用は計算側で判定します。",
+  childSupportTotalRatePercent:
+    "加入先の案内から「子ども・子育て支援金」の労使合計料率を入力します。名称の似た事業主負担の「子ども・子育て拠出金」は入力しません。",
+  transferBalance:
+    "現在のiDeCo残高のうち、DCへ移す想定額を入力します。今後積み立てる掛金は含めず、口座の評価額で確認してください。",
+  transferFee:
+    "移換元・移換先の手数料案内で、移換時に一度だけかかる費用を合計します。かからない場合は0、毎月の口座管理料は固定費欄へ入力してください。",
+  idleMonths:
+    "移換の手続きで資産を運用できない見込み月数を入力します。移換元・移換先に期間を確認し、運用停止なしの比較なら0にします。",
+  eventAge:
+    "通常の昇給率とは異なる給与改定を想定する年齢を入力します。同じ年齢を重複させず、試算開始より後・退職より前の年齢を指定してください。",
+  eventRate:
+    "この年齢の年だけ適用する昇給率を入力します。通常の昇給率への上乗せではなく置き換えです。給与が増えない年は0、下がる年は負の値にします。",
   raiseRate:
     "毎年の給与増加率です。初期値2%は比較用の仮定で、統計上の平均や将来予測ではありません。勤務先の見込みに合わせて変更してください。",
   dcCost:
@@ -42,16 +85,16 @@ const defaults: Record<string, string> = {
   inflation: "2",
   discount: "2",
 };
-function addHints(form: HTMLFormElement) {
+let hintSequence = 0;
+function addHints(form: HTMLElement) {
   for (const control of form.querySelectorAll<HTMLInputElement | HTMLSelectElement>(
     "input, select",
   )) {
     const label = control.closest("label");
-    if (!label) continue;
+    if (!label || control.closest(".field")) continue;
     if (control.type === "checkbox") label.classList.add("checkbox-label");
-    const text =
-      hints[control.name] ??
-      `${label.textContent ?? ""}を設定します。金額は円、割合は%で入力してください。`;
+    const text = hints[control.name];
+    if (!text) continue;
     const hint = document.createElement("span");
     hint.className = "field-help";
     const button = document.createElement("button");
@@ -60,7 +103,8 @@ function addHints(form: HTMLFormElement) {
     button.setAttribute("aria-label", `${label.textContent}の説明`);
     const tip = document.createElement("span");
     tip.className = "field-tooltip";
-    tip.id = `help-${control.name}`;
+    const hintId = hintSequence++;
+    tip.id = `help-${control.name}-${hintId}`;
     tip.setAttribute("role", "tooltip");
     tip.textContent = text;
     button.setAttribute("aria-describedby", tip.id);
@@ -72,11 +116,21 @@ function addHints(form: HTMLFormElement) {
       }
     });
     hint.append(button, tip);
-    label.after(hint);
+
     const wrapper = document.createElement("div");
     wrapper.className = "field";
     label.before(wrapper);
-    wrapper.append(label, hint);
+    const heading = document.createElement("div");
+    heading.className = "field-heading";
+    control.id = `field-${control.name}-${hintId}`;
+    label.htmlFor = control.id;
+    control.remove();
+    heading.append(label, hint);
+    wrapper.append(heading, control);
+    if (control.type === "checkbox") {
+      wrapper.classList.add("checkbox-field");
+      wrapper.prepend(control);
+    }
   }
 }
 const PREFECTURE_LABELS: Record<string, string> = {
@@ -285,6 +339,7 @@ export function createForm(prefectures: string[]): HTMLFormElement {
     remove.addEventListener("click", () => row.remove());
     row.append(remove);
     events.insertBefore(row, add);
+    addHints(row);
   });
   events.append(add);
   form.append(events);

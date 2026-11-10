@@ -359,3 +359,29 @@ test("warns when DC contribution exceeds the cap", async ({ page }) => {
     page.getByText("選択制DCの月額掛金70000円は上限55000円を超えています。", { exact: false }),
   ).toBeVisible();
 });
+
+for (const width of [375, 1280]) {
+  test(`help icons follow labels and stay circular at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 812 });
+    await page.goto("/");
+    await page.getByRole("button", { name: "詳細入力に切り替える" }).click();
+    await page.getByRole("button", { name: "イベントを追加" }).click();
+    await page.getByRole("button", { name: "イベントを追加" }).click();
+    const headings = page.locator(".field-heading:visible");
+    for (const heading of await headings.all()) {
+      const label = await heading.locator("label").boundingBox();
+      const icon = await heading.locator("button").boundingBox();
+      expect(label).not.toBeNull();
+      expect(icon).not.toBeNull();
+      if (!label || !icon) throw new Error("Missing label or icon");
+      expect(icon.width).toBe(24);
+      expect(icon.height).toBe(24);
+      expect(icon.x).toBeGreaterThanOrEqual(label.x + label.width);
+    }
+    const ids = await page.locator("[id]").evaluateAll((elements) => elements.map((e) => e.id));
+    expect(new Set(ids).size).toBe(ids.length);
+    const help = page.getByRole("button", { name: "DC年率コスト（%）の説明", exact: true });
+    await help.click();
+    await expect(page.locator('[role="tooltip"]:visible')).toContainText("各商品の年率×資産配分");
+  });
+}
