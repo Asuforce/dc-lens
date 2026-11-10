@@ -8,7 +8,7 @@ test("switches detailed mode while keeping inputs local", async ({ page }) => {
   await page.goto("/");
   await fill(page);
   await page.getByRole("button", { name: "比較する" }).click();
-  const simple = await page.locator("#summary .cards").textContent();
+  const simple = await page.locator("#summary .cards").first().textContent();
   await page.getByLabel("計算モード").selectOption("detailed");
   await page.getByLabel("昇給月").selectOption("7");
   await page.getByRole("button", { name: "比較する" }).click();
@@ -22,7 +22,7 @@ test("switches detailed mode while keeping inputs local", async ({ page }) => {
   await expect(
     page.getByRole("columnheader", { name: "標準報酬月額 厚年 / 健保 (DC → iDeCo)" }),
   ).toHaveCount(0);
-  expect(await page.locator("#summary .cards").textContent()).toBe(simple);
+  expect(await page.locator("#summary .cards").first().textContent()).toBe(simple);
   expect(
     requests.every(
       (url) =>
@@ -74,7 +74,7 @@ test("compares transfer separately without sending or storing inputs", async ({
   await expect(page.locator("#transfer-result")).toContainText("iDeCoで継続");
   await expect(page.locator("#transfer-result")).toContainText("DCへ移換");
   await expect(page.locator("#transfer-result")).toContainText("差額");
-  await expect(page.locator("#summary .cards")).toBeVisible();
+  await expect(page.locator("#summary .cards").first()).toBeVisible();
   expect(await page.evaluate(() => [localStorage.length, sessionStorage.length])).toEqual([0, 0]);
   expect(external).toEqual([]);
   await page.getByLabel("既存資産の移換も比較する").uncheck();

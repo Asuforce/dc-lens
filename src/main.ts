@@ -41,6 +41,11 @@ if (!resolved.ok) {
   form.hidden = true;
   switcher.addEventListener("click", () => {
     form.hidden = !form.hidden;
+    element("input-guidance").textContent = form.hidden
+      ? "両制度に同額を積み立てる場合を比較します。すべての金額は円単位です。"
+      : "すべての金額は円単位です。月給を省略すると年収と賞与から推定します。";
+    element("result-status").textContent = "";
+    element("result-link").hidden = true;
     quick.hidden = !form.hidden;
     switcher.textContent = form.hidden ? "詳細入力に切り替える" : "簡易入力に切り替える";
     switcher.setAttribute("aria-expanded", String(!form.hidden));
@@ -59,6 +64,7 @@ if (!resolved.ok) {
   comparison.append(heading, status, tableContainer);
   output.after(comparison);
   const renderComparison = () => {
+    comparison.hidden = scenarios.length === 0;
     tableContainer.replaceChildren(
       renderScenarioTable(scenarios, (id) => {
         scenarios = removeScenario(scenarios, id);
@@ -71,6 +77,8 @@ if (!resolved.ok) {
   let submitted = false;
   const run = () => {
     submitted = false;
+    element("result-status").textContent = "";
+    element("result-link").hidden = true;
     output.replaceChildren();
     errors.textContent = "";
     const parsed = parseForm(readForm(form, set.versions.join(" / ")));
@@ -127,6 +135,8 @@ if (!resolved.ok) {
       });
       const download = output.querySelector("#csv-download");
       download?.after(label, button);
+      element("result-status").textContent = "計算結果を更新しました。";
+      element("result-link").hidden = false;
       submitted = true;
     } catch (e) {
       if (e instanceof SimulationInputError) {
