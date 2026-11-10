@@ -18,6 +18,67 @@ const fields: [keyof FormValues, string][] = [
   ["inflation", "インフレ率（%）"],
   ["discount", "割引率（%）"],
 ];
+const hints: Record<string, string> = {
+  raiseRate:
+    "毎年の給与増加率です。初期値2%は比較用の仮定で、統計上の平均や将来予測ではありません。勤務先の見込みに合わせて変更してください。",
+  dcCost:
+    "DCの商品資料にある信託報酬（税込・年率）を入力します。複数商品なら各商品の年率×資産配分の合計です。例：0.2%を60%、0.4%を40%なら0.28%。固定費は含めません。",
+  idecoCost:
+    "iDeCoの商品資料にある信託報酬（税込・年率）を入力します。複数商品なら各商品の年率×資産配分の合計です。例：0.2%を60%、0.4%を40%なら0.28%。月額の固定費は別欄に入力します。",
+  grossReturn:
+    "信託報酬を引く前の年間利回りです。初期値3%は比較用の仮定で、推奨商品や将来の収益を示しません。0%やマイナスの場合も比較してください。",
+  inflation: "物価の年間上昇率です。初期値2%は比較用の仮定です。現在の計算では使用しません。",
+  discount:
+    "将来のお金を現在の価値に換算する年率です。1年後の102円は割引率2%なら現在の100円に相当します。初期値2%は比較用の仮定で、インフレ率とは別の設定です。",
+  insurer: "健保組合・カスタム料率では、ご加入先が公表する料率を入力してください。",
+  mode: "詳細モードでは昇給月を指定できます。対応範囲と計算上の仮定は結果で確認してください。",
+  transferEnabled: "既存資産の運用コストと移換費用を、新規掛金の比較とは分けて試算します。",
+  payoutEnabled:
+    "一時金受取時の課税を追加で試算します。適用条件と対象外の条件を結果で確認してください。",
+};
+const defaults: Record<string, string> = {
+  raiseRate: "2",
+  grossReturn: "3",
+  inflation: "2",
+  discount: "2",
+};
+function addHints(form: HTMLFormElement) {
+  for (const control of form.querySelectorAll<HTMLInputElement | HTMLSelectElement>(
+    "input, select",
+  )) {
+    const label = control.closest("label");
+    if (!label) continue;
+    if (control.type === "checkbox") label.classList.add("checkbox-label");
+    const text =
+      hints[control.name] ??
+      `${label.textContent ?? ""}を設定します。金額は円、割合は%で入力してください。`;
+    const hint = document.createElement("span");
+    hint.className = "field-help";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "?";
+    button.setAttribute("aria-label", `${label.textContent}の説明`);
+    const tip = document.createElement("span");
+    tip.className = "field-tooltip";
+    tip.id = `help-${control.name}`;
+    tip.setAttribute("role", "tooltip");
+    tip.textContent = text;
+    button.setAttribute("aria-describedby", tip.id);
+    button.addEventListener("click", () => hint.classList.toggle("is-open"));
+    button.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        hint.classList.remove("is-open");
+        button.blur();
+      }
+    });
+    hint.append(button, tip);
+    label.after(hint);
+    const wrapper = document.createElement("div");
+    wrapper.className = "field";
+    label.before(wrapper);
+    wrapper.append(label, hint);
+  }
+}
 const PREFECTURE_LABELS: Record<string, string> = {
   hokkaido: "北海道",
   aomori: "青森県",
@@ -109,6 +170,7 @@ export function createForm(prefectures: string[]): HTMLFormElement {
     i.name = name;
     i.type = "number";
     i.step = "any";
+    i.value = defaults[name] ?? "";
     l.append(i);
     groups[index < 4 ? 0 : index < 8 ? 1 : index < 13 ? 2 : 3]?.append(l);
   }
@@ -164,7 +226,7 @@ export function createForm(prefectures: string[]): HTMLFormElement {
   mode?.addEventListener("change", updateMode);
   updateMode();
   const customRates = document.createElement("div");
-  customRates.className = "form-grid";
+  customRates.className = "form-grid full-width";
   const help = document.createElement("p");
   help.textContent =
     "料率は労使合計を入力し、本人負担は折半として計算します。事業主負担が大きい場合は本人料率の2倍を合計として入力してください。";
@@ -189,7 +251,8 @@ export function createForm(prefectures: string[]): HTMLFormElement {
   const updateInsurer = () => {
     const isCustom = insurer?.value !== "kyokai-kenpo";
     customRates.hidden = !isCustom;
-    if (prefecture?.parentElement) prefecture.parentElement.hidden = isCustom;
+    const prefectureField = prefecture?.closest(".field") ?? prefecture?.parentElement;
+    if (prefectureField instanceof HTMLElement) prefectureField.hidden = isCustom;
   };
   insurer?.addEventListener("change", updateInsurer);
   updateInsurer();
@@ -268,6 +331,7 @@ export function createForm(prefectures: string[]): HTMLFormElement {
   button.type = "submit";
   button.textContent = "比較する";
   form.append(button);
+  addHints(form);
   return form;
 }
 export function readForm(form: HTMLFormElement, version: string): FormValues {
