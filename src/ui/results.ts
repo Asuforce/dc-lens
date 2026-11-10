@@ -87,9 +87,24 @@ export function renderResults(
   ] as [string, string][]) {
     const card = node("div", "");
     card.append(node("h3", label), node("p", value));
+    if (cards.childElementCount === 0) card.className = "current-difference";
     cards.append(card);
   }
-  root.append(cards);
+  const items = Array.from(cards.children);
+  const group = (title: string, children: Element[]) => {
+    const section = document.createElement("section");
+    section.append(node("h3", title));
+    const grid = document.createElement("div");
+    grid.className = "cards";
+    grid.append(...children);
+    section.append(grid);
+    return section;
+  };
+  root.append(
+    group("現在", items.slice(0, 1)),
+    group("退職時・受給期", items.slice(1, 3)),
+    group("生涯の比較", items.slice(3)),
+  );
   const download = document.createElement("button");
   download.type = "button";
   download.id = "csv-download";

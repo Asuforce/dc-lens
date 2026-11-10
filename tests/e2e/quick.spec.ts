@@ -21,3 +21,25 @@ test("three inputs calculate and update without sending input data", async ({ pa
   await expect(page.locator('[name="age"]')).toBeVisible();
   expect(requests).toEqual([]);
 });
+
+test("quick editing keeps focus and mobile results stay inside the page", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto("/");
+  await expect(page.locator("#errors")).toBeEmpty();
+  await expect(page.getByRole("heading", { name: "シナリオ比較", exact: true })).toBeHidden();
+  const income = page.locator('[name="income"]');
+  await income.fill("4832000");
+  await page.locator('[name="contribution"]').fill("14000");
+  await page.locator('[name="balance"]').fill("86000");
+  await page.getByRole("button", { name: "概算する" }).click();
+  await expect(page.locator("#result-status")).toContainText("更新しました");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  await income.fill("");
+  await expect(page.locator("#result-status")).toBeEmpty();
+  await expect(page.locator("#result-link")).toBeHidden();
+  await expect(income).toBeFocused();
+  await income.pressSequentially("4832000");
+  await expect(income).toBeFocused();
+  await expect(page.locator("#errors")).toBeEmpty();
+  await expect(page.locator("#output table")).toBeVisible();
+});

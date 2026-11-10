@@ -13,7 +13,7 @@ export function createQuickForm(
   const grid = document.createElement("div");
   grid.className = "form-grid";
   for (const [name, title] of [
-    ["income", "年収（税込み・円）"],
+    ["income", "年収（税引前・円）"],
     ["contribution", "毎月の積立額（円）"],
     ["balance", "現在の積立残高（円）"],
   ] as const) {
@@ -28,16 +28,22 @@ export function createQuickForm(
     label.append(input);
     grid.append(label);
   }
+  const balanceHint = document.createElement("p");
+  balanceHint.textContent = "現在の積立残高は、移換せず保有を続ける既存資産です。";
   const note = document.createElement("p");
   note.textContent =
     "概算条件：40歳未満・協会けんぽ東京、年収を12分割した月給（端数は賞与）、昇給なし。運用は年率3%、コスト・固定費は未反映。加入資格・拠出上限は勤務先等で確認してください。";
   const button = document.createElement("button");
   button.type = "submit";
   button.textContent = "概算する";
-  form.append(grid, note, button);
-  const run = () => {
+  form.append(grid, balanceHint, note, button);
+  const run = (explicitSubmit = false) => {
     errors.textContent = "";
     output.replaceChildren();
+    const status = document.getElementById("result-status");
+    if (status) status.textContent = "";
+    const resultLink = document.getElementById("result-link");
+    if (resultLink) resultLink.hidden = true;
     const data = new FormData(form);
     const values = ["income", "contribution", "balance"].map((key) => {
       const raw = String(data.get(key) ?? "");
@@ -47,7 +53,7 @@ export function createQuickForm(
     if (values.some((value) => !Number.isSafeInteger(value) || value < 0) || income <= 0) {
       errors.textContent =
         "3項目を整数円で入力してください。年収は1円以上、積立額・残高は0円以上です。";
-      errors.focus();
+      if (explicitSubmit) errors.focus();
       return;
     }
     const monthly = Math.floor(income / 12);
@@ -82,9 +88,17 @@ export function createQuickForm(
       const result = simulate(parsed.input, set);
       const heading = document.createElement("h2");
       heading.textContent = "簡易シミュレーション";
-      const summary = document.createElement("p");
+      const summary = document.createElement("div");
+      summary.className = "current-difference";
       const yen = (value: number) => `${value.toLocaleString("ja-JP")}円`;
-      summary.textContent = `年間の手取り差（選択制DC − iDeCo）：${yen(result.summary.currentAnnualDifferenceYen)}。正の値はDCの手取りが多いことを示します。`;
+      const label = document.createElement("h3");
+      label.textContent = "現在の年間手取り差";
+      const amount = document.createElement("p");
+      amount.className = "difference-value";
+      amount.textContent = yen(result.summary.currentAnnualDifferenceYen);
+      const meaning = document.createElement("p");
+      meaning.textContent = "選択制DC − iDeCo。正の値はDCの手取りが多いことを示します。";
+      summary.append(label, amount, meaning);
       const table = document.createElement("table");
       table.innerHTML =
         "<caption>積立残高の推移（名目・税引前、両制度共通）</caption><thead><tr><th scope='col'>経過年数</th><th scope='col'>新規積立分</th><th scope='col'>現在の残高分</th><th scope='col'>合計</th></tr></thead>";
@@ -116,7 +130,20 @@ export function createQuickForm(
         list.append(item);
       }
       assumptions.append(title, list);
-      output.append(heading, summary, table, notes, assumptions);
+      const scroll = document.createElement("div");
+      scroll.className = "chart-scroll";
+      scroll.tabIndex = 0;
+      scroll.setAttribute("role", "region");
+      scroll.setAttribute("aria-label", "積立残高の推移");
+      scroll.append(table);
+      output.append(heading, summary, scroll, notes, assumptions);
+      if (resultLink) resultLink.hidden = false;
+      if (explicitSubmit) {
+        const status = document.getElementById("result-status");
+        if (status) status.textContent = "計算結果を更新しました。";
+        const link = document.getElementById("result-link");
+        if (link) link.hidden = false;
+      }
     } catch (error) {
       errors.textContent = error instanceof Error ? error.message : "計算できませんでした。";
     }
@@ -125,7 +152,7 @@ export function createQuickForm(
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     submitted = true;
-    run();
+    run(true);
   });
   form.addEventListener("input", () => {
     if (submitted) run();
